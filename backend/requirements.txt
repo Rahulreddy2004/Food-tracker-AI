@@ -1,0 +1,15 @@
+# --- Backend Server ---
+Flask==3.0.3
+Flask-CORS==4.0.1
+Pillow==10.4.0
+gunicorn==22.0.0
+
+# --- AI & Math Libraries ---
+tensorflow==2.19.0
+ultralytics==8.2.2
+opencv-python-headless==4.9.0.80
+numpy==1.26.4
+
+# --- NEW: For API Calls ---
+requests==2.32.3
+```

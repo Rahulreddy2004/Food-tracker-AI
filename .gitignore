@@ -1,0 +1,13 @@
+# Huge files
+*.h5
+*.pt
+*.pth
+
+# Secrets
+serviceAccountKey.json
+
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+.DS_Store
