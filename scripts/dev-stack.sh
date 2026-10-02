@@ -29,7 +29,7 @@ until curl -sf http://127.0.0.1:9099 >/dev/null && curl -sf http://127.0.0.1:808
   ENV=development DATA_BACKEND=firestore FIREBASE_PROJECT_ID=$PROJECT \
   STORAGE_BUCKET=$PROJECT.appspot.com \
   MODEL_BACKEND="${MODEL_BACKEND:-fake}" LLM_BACKEND="${LLM_BACKEND:-fake}" \
-  CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173 \
+  CORS_ORIGINS="${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}" \
   uv run uvicorn app.main:app --port 8000 --reload
 ) &
 pids+=($!)

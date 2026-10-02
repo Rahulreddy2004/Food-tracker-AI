@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 import { EmptyState, ErrorState, PageHeader } from "@/components/layout";
 import { FoodIcon, MacroInline } from "@/components/nutrition";
