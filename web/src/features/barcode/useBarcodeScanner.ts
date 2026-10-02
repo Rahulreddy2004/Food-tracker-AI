@@ -10,11 +10,17 @@ interface BarcodeDetectorLike {
 }
 type BarcodeDetectorCtor = new (opts: { formats: string[] }) => BarcodeDetectorLike;
 
+/** Product barcodes only: the codes Open Food Facts knows. */
 const FORMATS = ["ean_13", "ean_8", "upc_a", "upc_e"];
+const CAMERA: MediaStreamConstraints = {
+  video: { facingMode: { ideal: "environment" } },
+  audio: false,
+};
 
 /**
- * Live barcode scanning. Uses the browser's BarcodeDetector where available (Chrome/Android) and
- * falls back to ZXing (loaded only when needed). Stops after the first read; `enabled` restarts it.
+ * Live barcode scanning. Uses the browser's BarcodeDetector where available (Chrome on Android
+ * and macOS) and falls back to ZXing (loaded only when needed). Stops after the first read;
+ * `enabled` restarts it.
  */
 export function useBarcodeScanner(
   videoRef: RefObject<HTMLVideoElement | null>,
@@ -23,6 +29,8 @@ export function useBarcodeScanner(
 ): ScannerStatus {
   const [status, setStatus] = useState<ScannerStatus>("idle");
   const onCodeRef = useRef(onCode);
+  // Settles once the previous camera session has fully stopped.
+  const previous = useRef<Promise<void>>(Promise.resolve());
   useEffect(() => {
     onCodeRef.current = onCode;
   });
@@ -32,11 +40,18 @@ export function useBarcodeScanner(
     const video = videoRef.current;
     if (!video) return;
     let stopped = false;
-    let cleanup: () => void = () => undefined;
+    let release: () => void = () => undefined;
+    // Keeps what was just started so cleanup can stop it, or stops it at once if this session
+    // ended while it was starting. Returns whether to carry on.
+    const hold = (stop: () => void) => {
+      release = stop;
+      if (stopped) stop();
+      return !stopped;
+    };
     const found = (code: string) => {
       if (stopped) return;
       stopped = true;
-      cleanup();
+      release();
       setStatus("idle");
       onCodeRef.current(code);
     };
@@ -52,16 +67,12 @@ export function useBarcodeScanner(
         .BarcodeDetector;
       try {
         if (Native) {
-          const stream = await media.getUserMedia({
-            video: { facingMode: { ideal: "environment" } },
-            audio: false,
-          });
-          if (stopped) {
-            stream.getTracks().forEach((t) => t.stop());
-            return;
-          }
+          const stream = await media.getUserMedia(CAMERA);
+          const stopTracks = () => stream.getTracks().forEach((t) => t.stop());
+          if (!hold(stopTracks)) return;
           video.srcObject = stream;
           await video.play().catch(() => undefined);
+          if (stopped) return;
           const detector = new Native({ formats: FORMATS });
           const timer = window.setInterval(() => {
             if (video.readyState < 2) return;
@@ -73,26 +84,30 @@ export function useBarcodeScanner(
               })
               .catch(() => undefined);
           }, 250);
-          cleanup = () => {
+          hold(() => {
             window.clearInterval(timer);
-            stream.getTracks().forEach((t) => t.stop());
-          };
+            stopTracks();
+          });
         } else {
-          const { BrowserMultiFormatReader } = await import("@zxing/browser");
-          const reader = new BrowserMultiFormatReader();
-          const controls = await reader.decodeFromConstraints(
-            { video: { facingMode: { ideal: "environment" } }, audio: false },
-            video,
-            (result) => {
-              const value = result?.getText();
-              if (value && /^\d{8,14}$/.test(value)) found(value);
-            },
-          );
-          cleanup = () => controls.stop();
-          if (stopped) cleanup();
+          const [{ BrowserMultiFormatOneDReader }, { BarcodeFormat, DecodeHintType }] =
+            await Promise.all([import("@zxing/browser"), import("@zxing/library")]);
+          if (stopped) return;
+          const hints = new Map([
+            [
+              DecodeHintType.POSSIBLE_FORMATS,
+              [BarcodeFormat.EAN_13, BarcodeFormat.EAN_8, BarcodeFormat.UPC_A, BarcodeFormat.UPC_E],
+            ],
+          ]);
+          const reader = new BrowserMultiFormatOneDReader(hints);
+          const controls = await reader.decodeFromConstraints(CAMERA, video, (result) => {
+            const value = result?.getText();
+            if (value && /^\d{8,14}$/.test(value)) found(value);
+          });
+          if (!hold(() => controls.stop())) return;
         }
-        if (!stopped) setStatus("scanning");
+        setStatus("scanning");
       } catch (err) {
+        if (stopped) return;
         const name = err instanceof DOMException ? err.name : "";
         setStatus(
           name === "NotAllowedError"
@@ -103,10 +118,15 @@ export function useBarcodeScanner(
         );
       }
     };
-    void start();
+
+    // One camera session at a time. React's development double-mount, or a quick restart, would
+    // otherwise start a second stream on the same <video> while the first is still starting, and
+    // stopping the first would then blank the second.
+    const run = previous.current.then(() => (stopped ? undefined : start()));
+    previous.current = run.catch(() => undefined);
     return () => {
       stopped = true;
-      cleanup();
+      release();
     };
   }, [enabled, videoRef]);
 

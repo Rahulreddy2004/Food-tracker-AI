@@ -563,6 +563,11 @@ export interface components {
             detector: string;
             /** Classifier */
             classifier: string;
+            /**
+             * Demo
+             * @description True when stand-in models answered (MODEL_BACKEND=fake); they ignore the photo
+             */
+            demo: boolean;
         };
         /**
          * NormBox

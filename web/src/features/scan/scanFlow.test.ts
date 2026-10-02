@@ -20,7 +20,7 @@ const scan: ScanResponse = {
   height: 480,
   source: "detector",
   timings: { decodeMs: 1, detectMs: 2, classifyMs: 3, totalMs: 6 },
-  models: { detector: "fake", classifier: "fake" },
+  models: { detector: "fake", classifier: "fake", demo: true },
   items: [
     {
       id: "a",

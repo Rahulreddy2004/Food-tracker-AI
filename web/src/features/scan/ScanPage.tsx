@@ -2,6 +2,7 @@ import {
   ArrowRight,
   Camera,
   CircleCheck,
+  FlaskConical,
   ImagePlus,
   Plus,
   RotateCcw,
@@ -61,6 +62,26 @@ function failureText(error: unknown): { title: string; detail: string } {
     }
   }
   return { title: "Something went wrong", detail: errorMessage(error) };
+}
+
+const code = "rounded bg-surface-2 px-1 py-0.5 font-mono text-[0.85em]";
+
+/** Shown when the API answers with its stand-in models, whose results ignore the photo. */
+function DemoModelsNotice() {
+  return (
+    <div
+      role="note"
+      className="mb-6 flex items-start gap-2.5 rounded-md bg-accent-soft px-4 py-3 text-sm text-ink"
+    >
+      <FlaskConical className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden />
+      <p>
+        <strong className="font-semibold">Demo models.</strong> These results are made up and don't
+        depend on your photo. To recognise food for real, run{" "}
+        <code className={code}>python3 scripts/fetch_models.py</code>, then restart with{" "}
+        <code className={code}>MODEL_BACKEND=onnx scripts/dev-stack.sh</code>.
+      </p>
+    </div>
+  );
 }
 
 function PhotoWithBoxes({
@@ -357,6 +378,7 @@ export default function ScanPage() {
           </Button>
         }
       />
+      {state.scan.models.demo && <DemoModelsNotice />}
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start">
         <div className="lg:sticky lg:top-8">
           <PhotoWithBoxes

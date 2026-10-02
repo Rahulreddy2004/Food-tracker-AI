@@ -48,6 +48,8 @@ test("scan a photo, correct a guess and log the meal", async ({ page }) => {
   await page.locator('input[type="file"]').setInputFiles(PHOTO);
 
   await expect(page.getByRole("heading", { name: "I found 3 foods" })).toBeVisible();
+  // The E2E stack runs the stand-in models, so the review must say so.
+  await expect(page.getByRole("note")).toContainText("Demo models.");
   await expectAccessible(page, "scan review");
   // Item 2: pick the second guess. Item 3 was unsure: keep the model's guess.
   await page

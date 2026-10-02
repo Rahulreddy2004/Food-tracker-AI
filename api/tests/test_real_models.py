@@ -55,6 +55,7 @@ async def test_scan_with_real_models(onnx_client: httpx.AsyncClient) -> None:
     body = res.json()
     assert body["models"]["detector"].startswith("yolov8-onnx" if HAVE_DETECTOR else "none")
     assert body["models"]["classifier"].startswith("siglip2-onnx")
+    assert body["models"]["demo"] is False
     assert body["items"], "at least one item (detected or whole-image fallback)"
     if not HAVE_DETECTOR:
         # One dish per photo, and SigLIP 2 knows this one (Food-101 does not).
