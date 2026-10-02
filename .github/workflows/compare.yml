@@ -1,0 +1,87 @@
+name: Compare models
+
+# Scores candidate food classifiers on the same test photos (Food-101 and an Indian-food set) and
+# posts a table to the run summary. See ml/compare.py for the candidates and what is measured.
+# Runs on demand; changes to the comparison itself trigger a small smoke run.
+
+on:
+  workflow_dispatch:
+    inputs:
+      per_class:
+        description: Food-101 test photos per class (250 = all 25,250)
+        default: "20"
+        required: true
+      candidates:
+        description: Comma-separated (yours, siglip2-base, siglip2-so400m, clip-b16, vit-food101, siglip2-food101)
+        default: yours,siglip2-base,siglip2-so400m,clip-b16,vit-food101,siglip2-food101
+        required: true
+  push:
+    paths:
+      - ml/compare.py
+      - ml/vocab/**
+      - .github/workflows/compare.yml
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash # -eo pipefail
+
+concurrency:
+  group: compare-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    name: Compare classifiers
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      # A push only needs to prove the comparison works: a few photos per class.
+      PER_CLASS: ${{ inputs.per_class || '2' }}
+      INDIAN_PER_CLASS: ${{ github.event_name == 'push' && '3' || '' }}
+      CANDIDATES: ${{ inputs.candidates || 'yours,siglip2-base,siglip2-so400m,clip-b16,vit-food101,siglip2-food101' }}
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      TOKENIZERS_PARALLELISM: "false"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Your weights, if they are on the models-v1 release
+        run: |
+          python3 scripts/fetch_models.py ||
+            python3 scripts/fetch_models.py --originals ||
+            echo "::notice::Your model is not on the models-v1 release yet, so it is skipped."
+
+      - name: Install (TensorFlow, PyTorch, Transformers)
+        working-directory: ml
+        run: uv sync
+
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/huggingface
+          key: hf-${{ hashFiles('ml/compare.py') }}-${{ env.PER_CLASS }}
+          restore-keys: hf-
+
+      - name: Compare
+        working-directory: ml
+        run: |
+          args=(--per-class "$PER_CLASS" --candidates "$CANDIDATES")
+          if [[ -n "$INDIAN_PER_CLASS" ]]; then args+=(--indian-per-class "$INDIAN_PER_CLASS"); fi
+          uv run python compare.py "${args[@]}"
+
+      - name: Summary
+        if: always()
+        run: |
+          if [[ -f ml/results/compare.md ]]; then cat ml/results/compare.md >> "$GITHUB_STEP_SUMMARY"; fi
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: comparison
+          path: ml/results/
+          if-no-files-found: ignore
+          retention-days: 90

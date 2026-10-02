@@ -9,7 +9,7 @@ import numpy as np
 import pillow_heif
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-from app.core.errors import ApiError
+from app.core.problem import ApiError
 from app.ml.structs import Box, RGBImage
 
 pillow_heif.register_heif_opener()

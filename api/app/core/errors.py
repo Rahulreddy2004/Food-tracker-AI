@@ -10,32 +10,13 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.core.problem import ApiError, not_found
+
+__all__ = ["PROBLEM_JSON", "ApiError", "install_error_handlers", "not_found"]
+
 log = structlog.get_logger()
 
 PROBLEM_JSON = "application/problem+json"
-
-
-class ApiError(Exception):
-    """Raise anywhere in the app to return a typed error to the client."""
-
-    def __init__(
-        self,
-        status: int,
-        code: str,
-        title: str,
-        detail: str | None = None,
-        headers: dict[str, str] | None = None,
-    ) -> None:
-        super().__init__(detail or title)
-        self.status = status
-        self.code = code
-        self.title = title
-        self.detail = detail
-        self.headers = headers
-
-
-def not_found(what: str) -> ApiError:
-    return ApiError(404, "not_found", f"{what} not found")
 
 
 def _problem(

@@ -16,6 +16,9 @@ api/models/*
 !api/models/manifest.json
 !api/models/README.md
 
+# Evaluation output (published as workflow artifacts instead)
+ml/results/
+
 # Python
 __pycache__/
 *.py[cod]

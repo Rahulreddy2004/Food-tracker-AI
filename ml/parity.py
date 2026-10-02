@@ -17,6 +17,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+from common import API, MODELS, load_keras
+
 from app.core.config import DATA_DIR
 from app.ml.boxes import iou
 from app.ml.classifier import OnnxClassifier
@@ -24,7 +26,6 @@ from app.ml.detector import OnnxYoloDetector
 from app.ml.image import decode_image, resize
 from app.ml.labels import LabelSet
 from app.ml.structs import Box
-from common import API, MODELS, load_keras
 
 
 def sample_images(folder: Path | None, count: int = 12) -> list[np.ndarray]:

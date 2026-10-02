@@ -109,6 +109,16 @@ optionally measures accuracy on the Food-101 test split, and uploads the ONNX fi
 `SHA256SUMS` file to the same release. `scripts/fetch_models.py` verifies every download against
 `api/models/manifest.json` (or the release's `SHA256SUMS`), and deploys use `--strict`.
 
+**Choosing a classifier.** The **Compare models** workflow (Actions → Compare models) scores
+several candidates on the same Food-101 and Indian-food test photos:
+- your model
+- open zero-shot models (SigLIP 2, CLIP)
+- community Food-101 fine-tunes
+
+The zero-shot models pick from 200 dishes: Food-101 plus
+[`ml/vocab/extra_dishes.json`](ml/vocab/extra_dishes.json). Each run reports accuracy, coverage,
+CPU latency and size.
+
 Honest limits are in the [model card](ml/MODEL_CARD.md): Food-101 is mostly Western restaurant
 dishes, a single photo can't measure depth, and every number is an estimate the user can edit.
 

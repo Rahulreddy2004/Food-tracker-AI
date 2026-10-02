@@ -20,6 +20,9 @@ dependencies = [
     "tqdm>=4.66",
     # The scripts reuse the API's own pre/post-processing (api/app), which reads its settings.
     "pydantic-settings>=2.6",
+    # compare.py: open models from Hugging Face (SigLIP 2, CLIP, Food-101 fine-tunes).
+    "transformers>=4.50,<5",
+    "sentencepiece>=0.2",
 ]
 
 [tool.uv]

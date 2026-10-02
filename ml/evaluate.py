@@ -20,11 +20,12 @@ from pathlib import Path
 import numpy as np
 from tqdm import tqdm
 
+from common import MODELS, ROOT
+
 from app.core.config import DATA_DIR
 from app.ml.classifier import OnnxClassifier
 from app.ml.image import decode_image
 from app.ml.labels import LabelSet
-from common import MODELS, ROOT
 
 RESULTS = ROOT / "ml" / "results"
 CARD = ROOT / "ml" / "MODEL_CARD.md"
