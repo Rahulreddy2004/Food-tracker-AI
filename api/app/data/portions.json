@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "description": "Reference box sizes as a fraction of the image area. A box this size is about one typical serving (servingG in nutrition_food101.json). Converted from the v1 pixel calibration, assumed to be measured on 640x640 images.",
+  "clamp": [
+    0.3,
+    3.0
+  ],
+  "default": {
+    "areaFrac": 0.3662
+  },
+  "classes": {
+    "apple_pie": {
+      "areaFrac": 0.293
+    },
+    "caesar_salad": {
+      "areaFrac": 0.6104
+    },
+    "chicken_curry": {
+      "areaFrac": 0.4395
+    },
+    "french_fries": {
+      "areaFrac": 0.3906
+    },
+    "greek_salad": {
+      "areaFrac": 0.6348
+    },
+    "hamburger": {
+      "areaFrac": 0.4395
+    },
+    "omelette": {
+      "areaFrac": 0.415
+    },
+    "pancakes": {
+      "areaFrac": 0.4639
+    },
+    "pizza": {
+      "areaFrac": 0.4883
+    },
+    "steak": {
+      "areaFrac": 0.5371
+    },
+    "sushi": {
+      "areaFrac": 0.1221
+    }
+  }
+}

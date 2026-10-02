@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Food Tracker — snap your plate, know your food</title>
+    <meta
+      name="description"
+      content="Take a photo of your meal. Food Tracker recognises 101 dishes, estimates the portion and logs calories and macros — with a friendly AI nutrition coach."
+    />
+    <meta name="theme-color" content="#fbf7f0" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:title" content="Food Tracker — snap your plate, know your food" />
+    <meta
+      property="og:description"
+      content="Photo-based food logging with an AI nutrition coach."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      // Apply a saved theme before first paint (no flash). Storage may be blocked; ignore then.
+      try {
+        var t = localStorage.getItem("ft-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <noscript>Food Tracker needs JavaScript to run.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

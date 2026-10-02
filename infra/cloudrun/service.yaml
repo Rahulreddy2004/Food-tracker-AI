@@ -1,0 +1,72 @@
+# Cloud Run service for the API. Applied by .github/workflows/deploy.yml:
+#   envsubst '$IMAGE $PROJECT_ID $REGION $WEB_ORIGINS' < service.yaml | gcloud run services replace -
+# Secrets come from Secret Manager (created by infra/bootstrap.sh); nothing sensitive lives here.
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: food-tracker-api
+  labels:
+    cloud.googleapis.com/location: ${REGION}
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        # Scale to zero when idle; at most 3 instances to cap cost.
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "3"
+        # CPU only while handling requests (cheaper), but a boost while the models load.
+        run.googleapis.com/cpu-throttling: "true"
+        run.googleapis.com/startup-cpu-boost: "true"
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      serviceAccountName: food-tracker-api@${PROJECT_ID}.iam.gserviceaccount.com
+      # A scan keeps both vCPUs busy for ~0.2 s; 8 in flight keeps latency predictable.
+      containerConcurrency: 8
+      # Long enough for a streamed coach reply.
+      timeoutSeconds: 300
+      containers:
+        - name: api
+          image: ${IMAGE}
+          ports:
+            - name: http1
+              containerPort: 8080
+          resources:
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          env:
+            - name: FIREBASE_PROJECT_ID
+              value: ${PROJECT_ID}
+            - name: STORAGE_BUCKET
+              value: ${PROJECT_ID}.firebasestorage.app
+            - name: CORS_ORIGINS
+              value: ${WEB_ORIGINS}
+            - name: ONNX_THREADS
+              value: "2"
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gemini-api-key
+                  key: latest
+            - name: CALORIENINJAS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: calorieninjas-api-key
+                  key: latest
+          # Traffic is only sent once both models are loaded.
+          startupProbe:
+            httpGet:
+              path: /v1/health/ready
+              port: 8080
+            periodSeconds: 2
+            timeoutSeconds: 2
+            failureThreshold: 45
+          livenessProbe:
+            httpGet:
+              path: /v1/health/live
+              port: 8080
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3

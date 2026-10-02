@@ -1,0 +1,103 @@
+name: Models
+
+# Convert the original weights to the ONNX files the API serves, prove they give the same answers,
+# and publish them on the same release. Run it by hand after uploading best.pt and
+# food101_EfficientNetV2B3_final.h5 to the release (Actions → Models → Run workflow).
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release that holds the original weights
+        default: models-v1
+        required: true
+      evaluate:
+        description: Also measure accuracy on the Food-101 test split
+        type: choice
+        options: ["no", "quick (20 per class)", "full (25,250 images)"]
+        default: "quick (20 per class)"
+
+permissions:
+  contents: write # upload release assets
+
+defaults:
+  run:
+    shell: bash # -eo pipefail: a failing command in a pipe fails the step
+
+concurrency:
+  group: models-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  convert:
+    name: Export → parity → publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      TAG: ${{ inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Download the original weights
+        run: python3 scripts/fetch_models.py --originals --tag "$TAG"
+
+      - name: Install the conversion toolchain (TensorFlow, Ultralytics, ONNX)
+        working-directory: ml
+        run: uv sync
+
+      - name: What the detector was trained on
+        working-directory: ml
+        run: |
+          uv run python - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          from ultralytics import YOLO
+          names = YOLO("../api/models/best.pt").names
+          print(f"**Detector classes ({len(names)}):** {', '.join(names.values())}")
+          PY
+
+      - name: Export to ONNX
+        working-directory: ml
+        run: uv run python export_onnx.py
+
+      - name: Parity (ONNX must match the originals)
+        working-directory: ml
+        run: uv run python parity.py | tee parity.txt
+
+      - name: Evaluate on Food-101
+        if: inputs.evaluate != 'no'
+        working-directory: ml
+        env:
+          EVALUATE: ${{ inputs.evaluate }}
+        run: |
+          if [[ "$EVALUATE" == quick* ]]; then uv run python evaluate.py --per-class 20
+          else uv run python evaluate.py; fi
+
+      - name: Publish ONNX files and checksums to the release
+        working-directory: api/models
+        run: |
+          sha256sum best.onnx classifier.onnx best.pt food101_EfficientNetV2B3_final.h5 > SHA256SUMS
+          gh release upload "$TAG" best.onnx classifier.onnx SHA256SUMS --clobber --repo "$GITHUB_REPOSITORY"
+          # shellcheck disable=SC2016  # the backticks are Markdown, not commands
+          {
+            echo "### Published to \`$TAG\`"
+            echo 'Pin these in `api/models/manifest.json` so a changed file is caught:'
+            echo '```'
+            cat SHA256SUMS
+            echo '```'
+            echo '```'
+            cat ../../ml/parity.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the evaluation results
+        if: inputs.evaluate != 'no'
+        uses: actions/upload-artifact@v7
+        with:
+          name: evaluation
+          path: |
+            ml/results/
+            ml/MODEL_CARD.md
+          retention-days: 90

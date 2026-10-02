@@ -1,0 +1,14 @@
+{
+  "repo": "Rahulreddy2004/Food-tracker-AI",
+  "tag": "models-v1",
+  "files": {
+    "originals": {
+      "best.pt": null,
+      "food101_EfficientNetV2B3_final.h5": null
+    },
+    "serving": {
+      "best.onnx": null,
+      "classifier.onnx": null
+    }
+  }
+}
