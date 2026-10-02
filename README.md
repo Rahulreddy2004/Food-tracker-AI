@@ -105,14 +105,19 @@ and boot of the production image.
 | Job | Name each dish among 200 | Find each dish on the plate (else: one dish per photo) | Name each dish among the 101 Food-101 dishes |
 
 All the files live on the GitHub Release **`models-v1`**, not in git. The **Models** workflow
-(Actions → Models → Run workflow) does the following:
+(Actions → Models → Run workflow) converts and checks your `best.pt` and `.h5` whenever they are
+on the release.
+
+It builds SigLIP 2 only when the release doesn't have it yet, or when you choose **rebuild and
+republish**. Then it:
 - exports SigLIP 2 from Hugging Face
 - checks it against PyTorch
 - runs the API on a real photo with it
 - measures its accuracy
 - publishes it to the release, which it creates if needed
 
-It also converts and checks your `best.pt` and `.h5` whenever they are on the release.
+A rebuild can produce a slightly different file, so copy the new checksums from the run's summary
+into `api/models/manifest.json`.
 
 `scripts/fetch_models.py` verifies every download against `api/models/manifest.json` (or the
 release's `SHA256SUMS`), and deploys use `--strict`.
@@ -148,20 +153,22 @@ exists anywhere. One-time setup:
    infra/bootstrap.sh
    ```
 4. Add the four repository **variables** it prints (Settings → Secrets and variables → Actions).
-5. Run **Actions → Models**. It publishes SigLIP 2 to the `models-v1` release, creating the
-   release if needed. Copy the checksums from its summary into `api/models/manifest.json` and
-   commit them.
-6. Optional: to find each dish on a plate, upload your detector, then run **Models** again.
-   ```bash
-   gh release upload models-v1 best.pt food101_EfficientNetV2B3_final.h5
-   ```
-   Uploading the `.h5` too lets the workflow compare your classifier with SigLIP 2.
+5. The models are ready: SigLIP 2 is on the `models-v1` release and its checksums are pinned in
+   `api/models/manifest.json`.
+6. Optional: to find each dish on a plate, add your detector to the release, then run
+   **Actions → Models** (keep the SigLIP 2 files).
+   - On GitHub: Releases → `models-v1` → Edit → attach `best.pt` → Update release.
+   - Or with the GitHub CLI: `gh release upload models-v1 best.pt`.
+
+   Adding `food101_EfficientNetV2B3_final.h5` too lets the workflow compare your classifier with
+   SigLIP 2. The files must have exactly these names.
 7. Preview the v1 → v2 data migration (it only reads):
    ```bash
    gcloud auth application-default login
    cd api && FIREBASE_PROJECT_ID=food-tracker-8baa9 uv run python -m app.tools.migrate_v1 --timezone Asia/Kolkata
    ```
-8. Merge `v2` into `main`. **Deploy** then:
+8. Run **Actions → Deploy → Run workflow** (on `main`). After this first run, every push to
+   `main` deploys by itself. **Deploy**:
    1. builds the image with the verified models
    2. deploys Cloud Run and smoke-tests it
    3. builds the web app with a CSP that allows only that API

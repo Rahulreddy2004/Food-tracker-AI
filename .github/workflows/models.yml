@@ -3,7 +3,8 @@ name: Models
 # Builds the model files the API serves and publishes them on a GitHub Release (default models-v1,
 # created if missing). Run it by hand: Actions → Models → Run workflow.
 #   classifier  SigLIP 2 base: image encoder → ONNX + one text embedding per dish, checked against
-#               PyTorch, then used by the API on a real photo
+#               PyTorch, then used by the API on a real photo. Only when the release lacks these
+#               files, or you choose "rebuild and republish"
 #   yours       your YOLOv8 detector (best.pt) and EfficientNet (.h5), converted and checked when
 #               you have uploaded them to the same release; skipped otherwise
 
@@ -19,6 +20,11 @@ on:
         type: choice
         options: ["no", "quick (20 per class)", "full (25,250 images)"]
         default: "quick (20 per class)"
+      siglip:
+        description: SigLIP 2 files already on the release
+        type: choice
+        options: ["keep them", "rebuild and republish"]
+        default: "keep them"
 
 permissions:
   contents: write # create the release and upload its assets
@@ -38,8 +44,32 @@ env:
   TOKENIZERS_PARALLELISM: "false"
 
 jobs:
+  release:
+    name: What is on the release
+    runs-on: ubuntu-latest
+    outputs:
+      siglip: ${{ steps.check.outputs.siglip }}
+    steps:
+      - id: check
+        env:
+          CHOICE: ${{ inputs.siglip }}
+        run: |
+          assets=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets -q '.assets[].name' || true)
+          if grep -qx siglip2_vision.onnx <<<"$assets" && grep -qx siglip2_dishes.npz <<<"$assets"; then
+            echo "siglip=yes" >> "$GITHUB_OUTPUT"
+            if [[ "$CHOICE" == "keep them" ]]; then
+              echo "::notice::Kept the SigLIP 2 files already on $TAG."
+            fi
+          else
+            echo "siglip=no" >> "$GITHUB_OUTPUT"
+          fi
+
   classifier:
     name: SigLIP 2 → ONNX → check → publish
+    needs: release
+    # A rebuild downloads SigLIP 2 again and can produce a different file, which no longer matches
+    # the checksum pinned in api/models/manifest.json. So published files are kept unless asked.
+    if: needs.release.outputs.siglip == 'no' || inputs.siglip == 'rebuild and republish'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -105,6 +135,8 @@ jobs:
   yours:
     name: Your detector and classifier (if on the release)
     needs: classifier
+    # Also when the SigLIP 2 job was skipped because its files are already published.
+    if: ${{ !cancelled() && !failure() }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
