@@ -1,24 +1,27 @@
 name: Models
 
-# Convert the original weights to the ONNX files the API serves, prove they give the same answers,
-# and publish them on the same release. Run it by hand after uploading best.pt and
-# food101_EfficientNetV2B3_final.h5 to the release (Actions → Models → Run workflow).
+# Builds the model files the API serves and publishes them on a GitHub Release (default models-v1,
+# created if missing). Run it by hand: Actions → Models → Run workflow.
+#   classifier  SigLIP 2 base: image encoder → ONNX + one text embedding per dish, checked against
+#               PyTorch, then used by the API on a real photo
+#   yours       your YOLOv8 detector (best.pt) and EfficientNet (.h5), converted and checked when
+#               you have uploaded them to the same release; skipped otherwise
 
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Release that holds the original weights
+        description: Release to publish to
         default: models-v1
         required: true
       evaluate:
-        description: Also measure accuracy on the Food-101 test split
+        description: Also measure accuracy on Food-101 and Indian-20
         type: choice
         options: ["no", "quick (20 per class)", "full (25,250 images)"]
         default: "quick (20 per class)"
 
 permissions:
-  contents: write # upload release assets
+  contents: write # create the release and upload its assets
 
 defaults:
   run:
@@ -28,28 +31,111 @@ concurrency:
   group: models-${{ inputs.tag }}
   cancel-in-progress: false
 
+env:
+  TAG: ${{ inputs.tag }}
+  GH_TOKEN: ${{ github.token }}
+  HF_HUB_DISABLE_PROGRESS_BARS: "1"
+  TOKENIZERS_PARALLELISM: "false"
+
 jobs:
-  convert:
-    name: Export → parity → publish
+  classifier:
+    name: SigLIP 2 → ONNX → check → publish
     runs-on: ubuntu-latest
-    timeout-minutes: 90
-    env:
-      TAG: ${{ inputs.tag }}
-      GH_TOKEN: ${{ github.token }}
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10.2.0
         with:
           python-version: "3.12"
-
-      - name: Download the original weights
-        run: python3 scripts/fetch_models.py --originals --tag "$TAG"
-
-      - name: Install the conversion toolchain (TensorFlow, Ultralytics, ONNX)
+      - name: Install the conversion toolchain
         working-directory: ml
         run: uv sync
 
-      - name: What the detector was trained on
+      - name: Export, then check the served path against PyTorch
+        working-directory: ml
+        run: uv run python export_siglip.py | tee export.txt
+
+      - name: The API scans a real photo with it
+        working-directory: api
+        run: uv sync --locked && uv run pytest -m models -q -rA
+
+      - name: Accuracy of the served model
+        if: inputs.evaluate != 'no'
+        working-directory: ml
+        env:
+          EVALUATE: ${{ inputs.evaluate }}
+        run: |
+          per_class=20
+          if [[ "$EVALUATE" == full* ]]; then per_class=250; fi
+          uv run python compare.py --candidates served --per-class "$per_class"
+
+      - name: Publish to the release
+        working-directory: api/models
+        run: |
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 ||
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "Model files ($TAG)" \
+              --notes "Files the API serves, built by the Models workflow. See api/models/README.md."
+          files=(siglip2_vision.onnx siglip2_dishes.npz)
+          # Merge into the release's SHA256SUMS, keeping lines for files this job does not touch.
+          gh release download "$TAG" -p SHA256SUMS -O old.sums --repo "$GITHUB_REPOSITORY" || : > old.sums
+          sha256sum "${files[@]}" > new.sums
+          awk 'NR == FNR { seen[$2] = 1; print; next } !($2 in seen)' new.sums old.sums > SHA256SUMS
+          gh release upload "$TAG" "${files[@]}" SHA256SUMS --clobber --repo "$GITHUB_REPOSITORY"
+          # shellcheck disable=SC2016  # the backticks are Markdown, not commands
+          {
+            echo "### SigLIP 2 published to \`$TAG\`"
+            echo 'Pin these in `api/models/manifest.json` so a changed file is caught:'
+            echo '```'
+            cat new.sums
+            echo '```'
+            echo '```'
+            grep -E "parity|fixture|PARITY" ../../ml/export.txt
+            echo '```'
+            if [[ -f ../../ml/results/compare.md ]]; then cat ../../ml/results/compare.md; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: classifier-evaluation
+          path: ml/results/
+          if-no-files-found: ignore
+          retention-days: 90
+
+  yours:
+    name: Your detector and classifier (if on the release)
+    needs: classifier
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - name: What is on the release
+        id: assets
+        run: |
+          assets=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets -q '.assets[].name')
+          has() { grep -qx "$1" <<<"$assets" && echo yes || echo no; }
+          {
+            echo "detector=$(has best.pt)"
+            echo "classifier=$(has food101_EfficientNetV2B3_final.h5)"
+          } >> "$GITHUB_OUTPUT"
+      - name: Nothing to convert yet
+        if: steps.assets.outputs.detector == 'no' && steps.assets.outputs.classifier == 'no'
+        run: echo "::notice::Upload best.pt and/or food101_EfficientNetV2B3_final.h5 to $TAG, then run this again."
+
+      - uses: astral-sh/setup-uv@v10.2.0
+        if: steps.assets.outputs.detector == 'yes' || steps.assets.outputs.classifier == 'yes'
+        with:
+          python-version: "3.12"
+      - name: Download the originals and install the toolchain
+        if: steps.assets.outputs.detector == 'yes' || steps.assets.outputs.classifier == 'yes'
+        run: |
+          for f in best.pt food101_EfficientNetV2B3_final.h5; do
+            gh release download "$TAG" -p "$f" -D api/models --repo "$GITHUB_REPOSITORY" || true
+          done
+          (cd ml && uv sync)
+
+      - name: Detector → ONNX, parity, and its classes
+        if: steps.assets.outputs.detector == 'yes'
         working-directory: ml
         run: |
           uv run python - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
@@ -57,47 +143,39 @@ jobs:
           names = YOLO("../api/models/best.pt").names
           print(f"**Detector classes ({len(names)}):** {', '.join(names.values())}")
           PY
+          uv run python export_onnx.py --only detector
+          uv run python parity.py --only detector | tee -a parity.txt
 
-      - name: Export to ONNX
+      - name: Your classifier → ONNX and parity
+        if: steps.assets.outputs.classifier == 'yes'
         working-directory: ml
-        run: uv run python export_onnx.py
-
-      - name: Parity (ONNX must match the originals)
-        working-directory: ml
-        run: uv run python parity.py | tee parity.txt
-
-      - name: Evaluate on Food-101
-        if: inputs.evaluate != 'no'
-        working-directory: ml
-        env:
-          EVALUATE: ${{ inputs.evaluate }}
         run: |
-          if [[ "$EVALUATE" == quick* ]]; then uv run python evaluate.py --per-class 20
-          else uv run python evaluate.py; fi
+          uv run python export_onnx.py --only classifier
+          uv run python parity.py --only classifier | tee -a parity.txt
 
-      - name: Publish ONNX files and checksums to the release
+      - name: Your classifier vs SigLIP 2 on the same photos
+        if: steps.assets.outputs.classifier == 'yes' && inputs.evaluate != 'no'
+        working-directory: ml
+        run: |
+          gh release download "$TAG" -p 'siglip2_*' -D ../api/models --repo "$GITHUB_REPOSITORY"
+          uv run python compare.py --candidates served,yours --per-class 20
+
+      - name: Publish
+        if: steps.assets.outputs.detector == 'yes' || steps.assets.outputs.classifier == 'yes'
         working-directory: api/models
         run: |
-          sha256sum best.onnx classifier.onnx best.pt food101_EfficientNetV2B3_final.h5 > SHA256SUMS
-          gh release upload "$TAG" best.onnx classifier.onnx SHA256SUMS --clobber --repo "$GITHUB_REPOSITORY"
+          files=()
+          for f in best.onnx classifier.onnx; do [[ -f "$f" ]] && files+=("$f"); done
+          gh release download "$TAG" -p SHA256SUMS -O old.sums --repo "$GITHUB_REPOSITORY" || : > old.sums
+          sha256sum "${files[@]}" best.pt food101_EfficientNetV2B3_final.h5 2>/dev/null > new.sums || true
+          awk 'NR == FNR { seen[$2] = 1; print; next } !($2 in seen)' new.sums old.sums > SHA256SUMS
+          gh release upload "$TAG" "${files[@]}" SHA256SUMS --clobber --repo "$GITHUB_REPOSITORY"
           # shellcheck disable=SC2016  # the backticks are Markdown, not commands
           {
-            echo "### Published to \`$TAG\`"
-            echo 'Pin these in `api/models/manifest.json` so a changed file is caught:'
+            echo "### Published ${files[*]} to \`$TAG\`"
             echo '```'
-            cat SHA256SUMS
-            echo '```'
-            echo '```'
+            cat new.sums
             cat ../../ml/parity.txt
             echo '```'
+            if [[ -f ../../ml/results/compare.md ]]; then cat ../../ml/results/compare.md; fi
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Keep the evaluation results
-        if: inputs.evaluate != 'no'
-        uses: actions/upload-artifact@v7
-        with:
-          name: evaluation
-          path: |
-            ml/results/
-            ml/MODEL_CARD.md
-          retention-days: 90

@@ -7,6 +7,10 @@
       "food101_EfficientNetV2B3_final.h5": null
     },
     "serving": {
+      "siglip2_vision.onnx": null,
+      "siglip2_dishes.npz": null
+    },
+    "optional": {
       "best.onnx": null,
       "classifier.onnx": null
     }

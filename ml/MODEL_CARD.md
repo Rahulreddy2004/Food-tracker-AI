@@ -39,7 +39,7 @@ _Not measured yet — the weights have not been published to the `models-v1` rel
 * **Portion estimate:** `grams = typical serving × (box area fraction ÷ reference fraction)`,
   clamped to 0.3–3×. It is resolution-independent, but a single photo cannot measure depth, so
   the UI always shows grams as an editable estimate. See `docs/adr/0003-portion-estimation.md`.
-* **Nutrition:** `api/app/data/nutrition_food101.json` has curated per-100 g values and a typical
+* **Nutrition:** `api/app/data/nutrition.json` has curated per-100 g values and a typical
   serving for every class (typical preparations; refresh with `scripts/build_nutrition_table.py`).
 
 ## Limits and honest use

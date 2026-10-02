@@ -9,3 +9,4 @@ tests
 .env.*
 models/*.pt
 models/*.h5
+models/*.part

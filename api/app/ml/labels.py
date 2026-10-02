@@ -1,10 +1,13 @@
-"""Class labels for the Food-101 classifier (index = model output index)."""
+"""Dish labels (index = class id). Ids 0..100 are Food-101 in the EfficientNet's output order;
+the open-vocabulary classifier scores every dish."""
 
 from __future__ import annotations
 
 import json
 from dataclasses import dataclass
 from pathlib import Path
+
+FOOD101_CLASSES = 101
 
 
 @dataclass(frozen=True, slots=True)

@@ -16,7 +16,11 @@ from app.main import create_app
 from tests.conftest import FIXTURES, _test_user
 
 MODELS_DIR = Path(os.environ.get("MODELS_DIR", API_DIR / "models"))
-HAVE_MODELS = (MODELS_DIR / "best.onnx").is_file() and (MODELS_DIR / "classifier.onnx").is_file()
+# The served classifier (SigLIP 2); the detector is optional.
+HAVE_MODELS = (MODELS_DIR / "siglip2_vision.onnx").is_file() and (
+    MODELS_DIR / "siglip2_dishes.npz"
+).is_file()
+HAVE_DETECTOR = (MODELS_DIR / "best.onnx").is_file()
 
 pytestmark = [
     pytest.mark.models,
@@ -49,9 +53,14 @@ async def test_scan_with_real_models(onnx_client: httpx.AsyncClient) -> None:
     res = await onnx_client.post("/v1/scan", files={"image": ("meal.jpg", photo, "image/jpeg")})
     assert res.status_code == 200, res.text
     body = res.json()
-    assert body["models"]["detector"].startswith("yolov8-onnx")
-    assert body["models"]["classifier"].startswith("efficientnetv2b3-onnx")
+    assert body["models"]["detector"].startswith("yolov8-onnx" if HAVE_DETECTOR else "none")
+    assert body["models"]["classifier"].startswith("siglip2-onnx")
     assert body["items"], "at least one item (detected or whole-image fallback)"
+    if not HAVE_DETECTOR:
+        # One dish per photo, and SigLIP 2 knows this one (Food-101 does not).
+        assert body["source"] == "full_image"
+        guesses = [p["label"] for p in body["items"][0]["predictions"]]
+        assert "palak_paneer" in guesses, guesses
     for item in body["items"]:
         assert len(item["predictions"]) == 3
         confs = [p["confidence"] for p in item["predictions"]]

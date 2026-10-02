@@ -25,7 +25,7 @@ from common import MODELS, ROOT
 from app.core.config import DATA_DIR
 from app.ml.classifier import OnnxClassifier
 from app.ml.image import decode_image
-from app.ml.labels import LabelSet
+from app.ml.labels import FOOD101_CLASSES, LabelSet
 
 RESULTS = ROOT / "ml" / "results"
 CARD = ROOT / "ml" / "MODEL_CARD.md"
@@ -58,7 +58,7 @@ def main() -> None:
     args = parser.parse_args()
 
     labels = LabelSet.load(DATA_DIR / "labels.json")
-    clf = OnnxClassifier(args.model, num_classes=len(labels), threads=4)
+    clf = OnnxClassifier(args.model, num_classes=FOOD101_CLASSES, threads=4)
     ds, ds_names = load_split(args.per_class)
     # Map dataset label ids to our model's output ids by *name*, so an order mismatch shows up.
     to_ours = {i: labels.by_name(n).id for i, n in enumerate(ds_names) if labels.by_name(n)}  # type: ignore[union-attr]

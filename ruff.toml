@@ -6,7 +6,7 @@ extend = "api/pyproject.toml"
 "ml/**" = ["S603"]
 
 [lint.isort]
-known-first-party = ["app"]
+known-first-party = ["app", "dishes"]
 # ml/common.py puts api/ on sys.path, so it must be imported before anything from `app`.
 section-order = ["future", "standard-library", "third-party", "bootstrap", "first-party", "local-folder"]
 

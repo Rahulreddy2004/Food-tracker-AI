@@ -6,6 +6,7 @@
     uv run python compare.py --candidates yours,siglip2-base
 
 Candidates
+  served           what the API serves: SigLIP 2 base as ONNX + dish embeddings (api/models)
   yours            your EfficientNetV2-B3 (classifier.onnx, else the .h5); Food-101 classes only
   siglip2-base     google/siglip2-base-patch16-224, zero-shot over all dishes
   siglip2-so400m   google/siglip2-so400m-patch14-384, zero-shot (opt-in: far too slow for CPU)
@@ -36,7 +37,7 @@ import time
 import traceback
 from collections import Counter
 from collections.abc import Iterator
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, Protocol
 
@@ -45,54 +46,11 @@ from PIL import Image
 
 from common import MODELS, ROOT
 
-from app.core.config import DATA_DIR
+from dishes import EXTRA, TEMPLATES, Vocab
 
 RESULTS = ROOT / "ml" / "results"
-EXTRA = ROOT / "ml" / "vocab" / "extra_dishes.json"
-TEMPLATES = ("a photo of {}, a type of food.", "a close-up photo of {}.")
 BENCH_CROPS = 4  # a typical scan: a few dishes on one plate
 BENCH_THREADS = 2  # Cloud Run instance size (infra/cloudrun/service.yaml)
-
-
-# --- Labels -----------------------------------------------------------------------------------
-
-
-def canonical(name: str) -> str:
-    return name.strip().lower().replace(" ", "_").replace("-", "_")
-
-
-@dataclass
-class Vocab:
-    """Every dish the app could name. Index = column in zero-shot score matrices."""
-
-    keys: list[str]
-    display: dict[str, str]
-    prompts: list[str]
-    food101: list[str]  # Food-101 keys in labels.json (= model output) order
-    alias: dict[str, str] = field(default_factory=dict)
-
-    def resolve(self, name: str) -> str:
-        key = canonical(name)
-        return self.alias.get(key, key)
-
-    @classmethod
-    def load(cls) -> Vocab:
-        food101 = json.loads((DATA_DIR / "labels.json").read_text())["classes"]
-        extra = json.loads(EXTRA.read_text())
-        keys = [c["name"] for c in food101] + [d["name"] for d in extra["dishes"]]
-        display = {c["name"]: c["display"] for c in food101} | {
-            d["name"]: d["display"] for d in extra["dishes"]
-        }
-        prompts = [c["display"].lower() for c in food101] + [
-            d.get("prompt", d["display"]).lower() for d in extra["dishes"]
-        ]
-        alias = {canonical(a): t for a, t in extra.get("food101_aliases", {}).items()}
-        for d in extra["dishes"]:
-            for a in d.get("aliases", []):
-                alias[canonical(a)] = d["name"]
-        if len(set(keys)) != len(keys):
-            raise SystemExit("duplicate dish names in labels.json + extra_dishes.json")
-        return cls(keys, display, prompts, [c["name"] for c in food101], alias)
 
 
 # --- Test sets --------------------------------------------------------------------------------
@@ -239,9 +197,7 @@ class ZeroShot:
         # Only the image tower would be served; the dish embeddings are computed once, offline.
         self.size_mb = _torch_size_mb(self.model.vision_model)
         with torch.inference_mode():
-            per_template = [
-                self._encode_text([t.format(p) for p in vocab.prompts]) for t in TEMPLATES
-            ]
+            per_template = [self._encode_text(vocab.texts(t)) for t in TEMPLATES]
             text = torch.stack(per_template).mean(0)
             self.text = torch.nn.functional.normalize(text, dim=-1)
         self.scale = float(self.model.logit_scale.detach().exp())
@@ -283,6 +239,29 @@ class ZeroShot:
         return _softmax(logits.numpy().astype(np.float64)).astype(np.float32)
 
 
+class Served:
+    """Exactly what the API runs: ZeroShotClassifier on the files in api/models."""
+
+    kind = "zero-shot, as served (ONNX)"
+
+    def __init__(self, vocab: Vocab) -> None:
+        from app.core.config import DATA_DIR
+        from app.ml.classifier import ZeroShotClassifier
+        from app.ml.labels import LabelSet
+
+        self.name = "served"
+        model, dishes = MODELS / "siglip2_vision.onnx", MODELS / "siglip2_dishes.npz"
+        if not (model.is_file() and dishes.is_file()):
+            raise Unavailable("siglip2_vision.onnx is not on the models-v1 release yet")
+        self.model_id = f"SigLIP 2 ({model.name})"
+        self.labels = vocab.keys
+        self._clf = ZeroShotClassifier(model, dishes, LabelSet.load(DATA_DIR / "labels.json"))
+        self.size_mb = model.stat().st_size / 1e6
+
+    def scores(self, images: list[Image.Image]) -> np.ndarray:
+        return self._clf.classify([np.asarray(im, dtype=np.uint8) for im in images])
+
+
 class FineTuned:
     """A classifier someone fine-tuned on Food-101 and shared on Hugging Face."""
 
@@ -311,6 +290,7 @@ class FineTuned:
 
 
 CANDIDATES: dict[str, Any] = {
+    "served": lambda v: Served(v),
     "yours": lambda v: Yours(v),
     "siglip2-base": lambda v: ZeroShot("siglip2-base", "google/siglip2-base-patch16-224", v),
     "siglip2-so400m": lambda v: ZeroShot("siglip2-so400m", "google/siglip2-so400m-patch14-384", v),
@@ -364,7 +344,7 @@ def metrics(
         if not ok
     )
     thresholds = {}
-    for t in np.arange(0.2, 0.95, 0.1):
+    for t in np.round(np.arange(0.1, 0.95, 0.1), 1):
         mask = confidence >= t
         if mask.any():
             thresholds[f"{t:.1f}"] = {
@@ -502,6 +482,26 @@ def render(report: dict[str, Any]) -> str:
             + ", ".join(f"{c['name']} {_pct(c['results']['food101_only']['top1'])}" for c in zero)
             + ".",
         ]
+    open_vocab = [c for c in ranked if c.get("results") and c.get("outputs", 0) > 101]
+    if open_vocab:
+        cuts = ["0.3", "0.5", "0.7"]
+        lines += [
+            "",
+            "**How sure, how right** (open-vocabulary models): share of photos answered with at "
+            "least this confidence · accuracy of those answers. The app asks the user to confirm "
+            "below its threshold (CONFIRM_BELOW).",
+            "",
+            "| Model | Test set | " + " | ".join(f"≥ {t}" for t in cuts) + " |",
+            "|---|---|" + "---|" * len(cuts),
+        ]
+        for c in open_vocab:
+            for key, title in (("food101", "Food-101"), ("indian20", "Indian-20")):
+                conf = c["results"].get(key, {}).get("confidence", {})
+                cells = [
+                    f"{conf[t]['answered']:.0%} · {conf[t]['accuracy']:.1%}" if t in conf else "–"
+                    for t in cuts
+                ]
+                lines.append(f"| {c['name']} | {title} | " + " | ".join(cells) + " |")
     if notes:
         lines += ["", "**Not compared**", *notes]
     lines += ["", f"_{report['generated']} · details in compare.json_", ""]

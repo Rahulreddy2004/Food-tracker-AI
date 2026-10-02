@@ -19,12 +19,11 @@ from PIL import Image
 
 from common import API, MODELS, load_keras
 
-from app.core.config import DATA_DIR
 from app.ml.boxes import iou
 from app.ml.classifier import OnnxClassifier
 from app.ml.detector import OnnxYoloDetector
 from app.ml.image import decode_image, resize
-from app.ml.labels import LabelSet
+from app.ml.labels import FOOD101_CLASSES
 from app.ml.structs import Box
 
 
@@ -48,9 +47,8 @@ def sample_images(folder: Path | None, count: int = 12) -> list[np.ndarray]:
 
 
 def check_classifier(h5: Path, onnx_path: Path, images: list[np.ndarray], atol: float) -> bool:
-    labels = LabelSet.load(DATA_DIR / "labels.json")
     keras_model = load_keras(h5)
-    served = OnnxClassifier(onnx_path, num_classes=len(labels), threads=2)
+    served = OnnxClassifier(onnx_path, num_classes=FOOD101_CLASSES, threads=2)
     batch = np.stack([resize(img, (served.size, served.size)) for img in images]).astype(np.float32)
     ref = np.asarray(keras_model.predict(batch, verbose=0), dtype=np.float32)
     got = served.classify(images)

@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "description": "Food-101 classes in the output order of food101_EfficientNetV2B3_final.h5 (index = model output index).",
+  "version": 2,
+  "description": "Every dish the app can name (index = class id). Ids 0-100 are the Food-101 classes in the output order of food101_EfficientNetV2B3_final.h5; ids 101+ come from ml/vocab/extra_dishes.json and are recognised by the open-vocabulary classifier (SigLIP 2) only.",
   "classes": [
     {
       "id": 0,
@@ -606,6 +606,600 @@
       "id": 100,
       "name": "waffles",
       "display": "Waffles",
+      "group": "Breakfast"
+    },
+    {
+      "id": 101,
+      "name": "palak_paneer",
+      "display": "Palak paneer",
+      "group": "Curry"
+    },
+    {
+      "id": 102,
+      "name": "paneer_butter_masala",
+      "display": "Paneer butter masala",
+      "group": "Curry"
+    },
+    {
+      "id": 103,
+      "name": "kadai_paneer",
+      "display": "Kadai paneer",
+      "group": "Curry"
+    },
+    {
+      "id": 104,
+      "name": "shahi_paneer",
+      "display": "Shahi paneer",
+      "group": "Curry"
+    },
+    {
+      "id": 105,
+      "name": "matar_paneer",
+      "display": "Matar paneer",
+      "group": "Curry"
+    },
+    {
+      "id": 106,
+      "name": "malai_kofta",
+      "display": "Malai kofta",
+      "group": "Curry"
+    },
+    {
+      "id": 107,
+      "name": "butter_chicken",
+      "display": "Butter chicken",
+      "group": "Curry"
+    },
+    {
+      "id": 108,
+      "name": "chicken_tikka_masala",
+      "display": "Chicken tikka masala",
+      "group": "Curry"
+    },
+    {
+      "id": 109,
+      "name": "chicken_korma",
+      "display": "Chicken korma",
+      "group": "Curry"
+    },
+    {
+      "id": 110,
+      "name": "rogan_josh",
+      "display": "Rogan josh",
+      "group": "Curry"
+    },
+    {
+      "id": 111,
+      "name": "mutton_curry",
+      "display": "Mutton curry",
+      "group": "Curry"
+    },
+    {
+      "id": 112,
+      "name": "keema",
+      "display": "Keema",
+      "group": "Curry"
+    },
+    {
+      "id": 113,
+      "name": "fish_curry",
+      "display": "Fish curry",
+      "group": "Curry"
+    },
+    {
+      "id": 114,
+      "name": "prawn_curry",
+      "display": "Prawn curry",
+      "group": "Curry"
+    },
+    {
+      "id": 115,
+      "name": "egg_curry",
+      "display": "Egg curry",
+      "group": "Curry"
+    },
+    {
+      "id": 116,
+      "name": "chana_masala",
+      "display": "Chana masala",
+      "group": "Curry"
+    },
+    {
+      "id": 117,
+      "name": "chole_bhature",
+      "display": "Chole bhature",
+      "group": "Curry"
+    },
+    {
+      "id": 118,
+      "name": "rajma",
+      "display": "Rajma",
+      "group": "Curry"
+    },
+    {
+      "id": 119,
+      "name": "dal_makhani",
+      "display": "Dal makhani",
+      "group": "Curry"
+    },
+    {
+      "id": 120,
+      "name": "dal_tadka",
+      "display": "Dal tadka",
+      "group": "Curry"
+    },
+    {
+      "id": 121,
+      "name": "sambar",
+      "display": "Sambar",
+      "group": "Soup"
+    },
+    {
+      "id": 122,
+      "name": "rasam",
+      "display": "Rasam",
+      "group": "Soup"
+    },
+    {
+      "id": 123,
+      "name": "aloo_gobi",
+      "display": "Aloo gobi",
+      "group": "Curry"
+    },
+    {
+      "id": 124,
+      "name": "bhindi_masala",
+      "display": "Bhindi masala",
+      "group": "Curry"
+    },
+    {
+      "id": 125,
+      "name": "baingan_bharta",
+      "display": "Baingan bharta",
+      "group": "Curry"
+    },
+    {
+      "id": 126,
+      "name": "sarson_ka_saag",
+      "display": "Sarson ka saag",
+      "group": "Curry"
+    },
+    {
+      "id": 127,
+      "name": "kadhi",
+      "display": "Kadhi",
+      "group": "Curry"
+    },
+    {
+      "id": 128,
+      "name": "vindaloo",
+      "display": "Vindaloo",
+      "group": "Curry"
+    },
+    {
+      "id": 129,
+      "name": "nihari",
+      "display": "Nihari",
+      "group": "Curry"
+    },
+    {
+      "id": 130,
+      "name": "haleem",
+      "display": "Haleem",
+      "group": "Curry"
+    },
+    {
+      "id": 131,
+      "name": "biryani",
+      "display": "Biryani",
+      "group": "Rice Dish"
+    },
+    {
+      "id": 132,
+      "name": "veg_pulao",
+      "display": "Vegetable pulao",
+      "group": "Rice Dish"
+    },
+    {
+      "id": 133,
+      "name": "jeera_rice",
+      "display": "Jeera rice",
+      "group": "Rice Dish"
+    },
+    {
+      "id": 134,
+      "name": "steamed_rice",
+      "display": "Steamed rice",
+      "group": "Rice Dish"
+    },
+    {
+      "id": 135,
+      "name": "lemon_rice",
+      "display": "Lemon rice",
+      "group": "Rice Dish"
+    },
+    {
+      "id": 136,
+      "name": "curd_rice",
+      "display": "Curd rice",
+      "group": "Rice Dish"
+    },
+    {
+      "id": 137,
+      "name": "khichdi",
+      "display": "Khichdi",
+      "group": "Rice Dish"
+    },
+    {
+      "id": 138,
+      "name": "naan",
+      "display": "Naan",
+      "group": "Bread"
+    },
+    {
+      "id": 139,
+      "name": "chapati",
+      "display": "Chapati",
+      "group": "Bread"
+    },
+    {
+      "id": 140,
+      "name": "paratha",
+      "display": "Paratha",
+      "group": "Bread"
+    },
+    {
+      "id": 141,
+      "name": "aloo_paratha",
+      "display": "Aloo paratha",
+      "group": "Bread"
+    },
+    {
+      "id": 142,
+      "name": "puri",
+      "display": "Puri",
+      "group": "Bread"
+    },
+    {
+      "id": 143,
+      "name": "kulcha",
+      "display": "Kulcha",
+      "group": "Bread"
+    },
+    {
+      "id": 144,
+      "name": "appam",
+      "display": "Appam",
+      "group": "Bread"
+    },
+    {
+      "id": 145,
+      "name": "masala_dosa",
+      "display": "Masala dosa",
+      "group": "Breakfast"
+    },
+    {
+      "id": 146,
+      "name": "idli",
+      "display": "Idli",
+      "group": "Breakfast"
+    },
+    {
+      "id": 147,
+      "name": "medu_vada",
+      "display": "Medu vada",
+      "group": "Breakfast"
+    },
+    {
+      "id": 148,
+      "name": "uttapam",
+      "display": "Uttapam",
+      "group": "Breakfast"
+    },
+    {
+      "id": 149,
+      "name": "upma",
+      "display": "Upma",
+      "group": "Breakfast"
+    },
+    {
+      "id": 150,
+      "name": "poha",
+      "display": "Poha",
+      "group": "Breakfast"
+    },
+    {
+      "id": 151,
+      "name": "pongal",
+      "display": "Pongal",
+      "group": "Breakfast"
+    },
+    {
+      "id": 152,
+      "name": "idiyappam",
+      "display": "Idiyappam",
+      "group": "Breakfast"
+    },
+    {
+      "id": 153,
+      "name": "dhokla",
+      "display": "Dhokla",
+      "group": "Breakfast"
+    },
+    {
+      "id": 154,
+      "name": "pakora",
+      "display": "Pakora",
+      "group": "Appetizer"
+    },
+    {
+      "id": 155,
+      "name": "pani_puri",
+      "display": "Pani puri",
+      "group": "Appetizer"
+    },
+    {
+      "id": 156,
+      "name": "bhel_puri",
+      "display": "Bhel puri",
+      "group": "Appetizer"
+    },
+    {
+      "id": 157,
+      "name": "papdi_chaat",
+      "display": "Papdi chaat",
+      "group": "Appetizer"
+    },
+    {
+      "id": 158,
+      "name": "aloo_tikki",
+      "display": "Aloo tikki",
+      "group": "Appetizer"
+    },
+    {
+      "id": 159,
+      "name": "dahi_vada",
+      "display": "Dahi vada",
+      "group": "Appetizer"
+    },
+    {
+      "id": 160,
+      "name": "kachori",
+      "display": "Kachori",
+      "group": "Appetizer"
+    },
+    {
+      "id": 161,
+      "name": "vada_pav",
+      "display": "Vada pav",
+      "group": "Sandwich"
+    },
+    {
+      "id": 162,
+      "name": "pav_bhaji",
+      "display": "Pav bhaji",
+      "group": "Vegetarian"
+    },
+    {
+      "id": 163,
+      "name": "misal_pav",
+      "display": "Misal pav",
+      "group": "Vegetarian"
+    },
+    {
+      "id": 164,
+      "name": "kathi_roll",
+      "display": "Kathi roll",
+      "group": "Sandwich"
+    },
+    {
+      "id": 165,
+      "name": "momos",
+      "display": "Momos",
+      "group": "Appetizer"
+    },
+    {
+      "id": 166,
+      "name": "paneer_tikka",
+      "display": "Paneer tikka",
+      "group": "Appetizer"
+    },
+    {
+      "id": 167,
+      "name": "tandoori_chicken",
+      "display": "Tandoori chicken",
+      "group": "Meat"
+    },
+    {
+      "id": 168,
+      "name": "chicken_tikka",
+      "display": "Chicken tikka",
+      "group": "Meat"
+    },
+    {
+      "id": 169,
+      "name": "seekh_kebab",
+      "display": "Seekh kebab",
+      "group": "Meat"
+    },
+    {
+      "id": 170,
+      "name": "chicken_65",
+      "display": "Chicken 65",
+      "group": "Meat"
+    },
+    {
+      "id": 171,
+      "name": "chilli_chicken",
+      "display": "Chilli chicken",
+      "group": "Meat"
+    },
+    {
+      "id": 172,
+      "name": "gobi_manchurian",
+      "display": "Gobi manchurian",
+      "group": "Appetizer"
+    },
+    {
+      "id": 173,
+      "name": "hakka_noodles",
+      "display": "Hakka noodles",
+      "group": "Noodle Dish"
+    },
+    {
+      "id": 174,
+      "name": "raita",
+      "display": "Raita",
+      "group": "Side Dish"
+    },
+    {
+      "id": 175,
+      "name": "papad",
+      "display": "Papad",
+      "group": "Side Dish"
+    },
+    {
+      "id": 176,
+      "name": "gulab_jamun",
+      "display": "Gulab jamun",
+      "group": "Dessert"
+    },
+    {
+      "id": 177,
+      "name": "jalebi",
+      "display": "Jalebi",
+      "group": "Dessert"
+    },
+    {
+      "id": 178,
+      "name": "rasgulla",
+      "display": "Rasgulla",
+      "group": "Dessert"
+    },
+    {
+      "id": 179,
+      "name": "rasmalai",
+      "display": "Rasmalai",
+      "group": "Dessert"
+    },
+    {
+      "id": 180,
+      "name": "kheer",
+      "display": "Kheer",
+      "group": "Dessert"
+    },
+    {
+      "id": 181,
+      "name": "gajar_halwa",
+      "display": "Gajar ka halwa",
+      "group": "Dessert"
+    },
+    {
+      "id": 182,
+      "name": "ladoo",
+      "display": "Ladoo",
+      "group": "Dessert"
+    },
+    {
+      "id": 183,
+      "name": "barfi",
+      "display": "Barfi",
+      "group": "Dessert"
+    },
+    {
+      "id": 184,
+      "name": "kulfi",
+      "display": "Kulfi",
+      "group": "Dessert"
+    },
+    {
+      "id": 185,
+      "name": "mysore_pak",
+      "display": "Mysore pak",
+      "group": "Dessert"
+    },
+    {
+      "id": 186,
+      "name": "falooda",
+      "display": "Falooda",
+      "group": "Dessert"
+    },
+    {
+      "id": 187,
+      "name": "chai",
+      "display": "Masala chai",
+      "group": "Drink"
+    },
+    {
+      "id": 188,
+      "name": "lassi",
+      "display": "Lassi",
+      "group": "Drink"
+    },
+    {
+      "id": 189,
+      "name": "filter_coffee",
+      "display": "Filter coffee",
+      "group": "Drink"
+    },
+    {
+      "id": 190,
+      "name": "banana",
+      "display": "Banana",
+      "group": "Fruit"
+    },
+    {
+      "id": 191,
+      "name": "apple",
+      "display": "Apple",
+      "group": "Fruit"
+    },
+    {
+      "id": 192,
+      "name": "orange",
+      "display": "Orange",
+      "group": "Fruit"
+    },
+    {
+      "id": 193,
+      "name": "mango",
+      "display": "Mango",
+      "group": "Fruit"
+    },
+    {
+      "id": 194,
+      "name": "grapes",
+      "display": "Grapes",
+      "group": "Fruit"
+    },
+    {
+      "id": 195,
+      "name": "watermelon",
+      "display": "Watermelon",
+      "group": "Fruit"
+    },
+    {
+      "id": 196,
+      "name": "papaya",
+      "display": "Papaya",
+      "group": "Fruit"
+    },
+    {
+      "id": 197,
+      "name": "boiled_egg",
+      "display": "Boiled egg",
+      "group": "Breakfast"
+    },
+    {
+      "id": 198,
+      "name": "oatmeal",
+      "display": "Oatmeal",
+      "group": "Breakfast"
+    },
+    {
+      "id": 199,
+      "name": "toast",
+      "display": "Toast",
       "group": "Breakfast"
     }
   ]

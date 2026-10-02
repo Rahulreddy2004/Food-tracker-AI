@@ -1,4 +1,4 @@
-"""Nutrition data: bundled Food-101 table, CalorieNinjas for free text, and unified search."""
+"""Nutrition data: the bundled dish table, CalorieNinjas for free text, and unified search."""
 
 from __future__ import annotations
 
@@ -141,7 +141,7 @@ def match_score(query: str, candidate: str) -> float:
 
 
 class FoodSearch:
-    """Search order: Food-101 dishes, the user's pantry, then CalorieNinjas when few local hits."""
+    """Search order: known dishes, the user's pantry, then CalorieNinjas when few local hits."""
 
     MIN_SCORE = 0.38
 
@@ -152,7 +152,7 @@ class FoodSearch:
         self.table = table
         self.calorie = calorie
 
-    def food101_hits(self, query: str) -> list[tuple[float, FoodHit]]:
+    def dish_hits(self, query: str) -> list[tuple[float, FoodHit]]:
         scored: list[tuple[float, FoodHit]] = []
         for food in self.labels.classes:
             entry = self.table.get(food.name)
@@ -164,7 +164,7 @@ class FoodSearch:
                     (
                         score,
                         FoodHit(
-                            source="food101",
+                            source="dish",
                             name=food.name,
                             display=food.display,
                             group=food.group,
@@ -199,7 +199,7 @@ class FoodSearch:
         return scored
 
     async def search(self, query: str, pantry: list[PantryFood], limit: int = 12) -> list[FoodHit]:
-        scored = self.food101_hits(query) + self.pantry_hits(query, pantry)
+        scored = self.dish_hits(query) + self.pantry_hits(query, pantry)
         scored.sort(key=lambda pair: pair[0], reverse=True)
         hits = [hit for _, hit in scored[:limit]]
         strong_local = sum(1 for score, _ in scored if score >= 0.75)

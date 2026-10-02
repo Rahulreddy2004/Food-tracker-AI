@@ -14,7 +14,7 @@ pixels than the 640 × 640 images the references were measured on, so the same p
 - `grams = typical_serving_g[dish] × clamp(area_fraction / reference_fraction[dish], 0.3, 3.0)`.
 - Reference fractions come from the v1 calibration, converted by assuming it was measured on
   640 × 640 images.
-- Typical servings are kept per dish in `api/app/data/nutrition_food101.json`.
+- Typical servings are kept per dish in `api/app/data/nutrition.json`.
 - The UI always shows the estimate as editable, and saved meals keep both `estimatedGrams` and the
   final `grams`, so the calibration can be improved later from real corrections.
 

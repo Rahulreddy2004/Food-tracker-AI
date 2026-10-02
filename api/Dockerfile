@@ -26,7 +26,8 @@ FROM base AS runtime
 RUN useradd --create-home --uid 10001 api
 WORKDIR /app
 COPY --from=build /app/.venv /app/.venv
-COPY models/best.onnx models/classifier.onnx /app/models/
+# Whatever fetch_models.py put in api/models (originals and partial downloads are excluded).
+COPY models/ /app/models/
 ENV PATH="/app/.venv/bin:${PATH}" \
     ENV=production \
     LOG_JSON=true \

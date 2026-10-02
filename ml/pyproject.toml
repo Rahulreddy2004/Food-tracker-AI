@@ -12,6 +12,7 @@ dependencies = [
     "onnx>=1.17",
     "onnxruntime>=1.20",
     "onnxslim>=0.1.90",
+    "onnxscript>=0.3",  # torch.onnx.export(dynamo=True), used by export_siglip.py
     "ultralytics>=8.3.50",
     "torch>=2.6",
     "torchvision>=0.21",

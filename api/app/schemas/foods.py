@@ -8,9 +8,9 @@ from app.schemas.common import ApiModel, Macros
 
 
 class FoodHit(ApiModel):
-    source: Literal["food101", "pantry", "calorieninjas"]
+    source: Literal["dish", "pantry", "calorieninjas"]
     id: str | None = Field(default=None, description="Pantry food id when source is `pantry`")
-    name: str = Field(description="Stable key, e.g. a Food-101 class name")
+    name: str = Field(description="Stable key, e.g. a dish name such as `palak_paneer`")
     display: str
     group: str | None = None
     per100g: Macros = Field(alias="per100g")

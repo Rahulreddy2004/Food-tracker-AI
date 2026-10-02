@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refresh api/app/data/nutrition_food101.json from CalorieNinjas (keeps typical serving sizes).
+"""Refresh api/app/data/nutrition.json from CalorieNinjas (keeps typical serving sizes).
 
     CALORIENINJAS_API_KEY=... python scripts/build_nutrition_table.py [--dry-run]
 
@@ -19,7 +19,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-TABLE = ROOT / "api" / "app" / "data" / "nutrition_food101.json"
+TABLE = ROOT / "api" / "app" / "data" / "nutrition.json"
 URL = "https://api.calorieninjas.com/v1/nutrition?query="
 
 
