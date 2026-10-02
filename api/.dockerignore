@@ -1,0 +1,11 @@
+.venv
+.mypy_cache
+.ruff_cache
+.pytest_cache
+__pycache__
+**/__pycache__
+tests
+.env
+.env.*
+models/*.pt
+models/*.h5

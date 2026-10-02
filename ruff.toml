@@ -1,0 +1,9 @@
+# Lint/format config for scripts/ and ml/ (the API's own config is in api/pyproject.toml).
+extend = "api/pyproject.toml"
+
+[lint.per-file-ignores]
+"scripts/**" = ["S310", "S603", "S607"]
+"ml/**" = ["S603"]
+
+[lint.isort]
+known-first-party = ["app", "common"]
