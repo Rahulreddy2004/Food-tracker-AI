@@ -147,6 +147,18 @@ for (const scheme of ["light", "dark"]) {
       await seed(token);
       await signInUi(page, email, "secret123");
       await capture(page, `today-${tag}`, { full: vpName === "mobile" });
+      if (want("scan")) {
+        await page.goto(`${WEB}/app/scan?source=upload`);
+        await page.locator('input[type="file"]').setInputFiles(resolve("public/images/palak-paneer-640.webp"));
+        await page.getByRole("button", { name: /Log meal/ }).waitFor();
+        await capture(page, `scan-review-${tag}`, { full: vpName === "mobile" });
+      }
+      if (want("coach")) {
+        await page.goto(`${WEB}/app/coach`);
+        await page.getByRole("button", { name: "What should I have for dinner tonight?" }).click();
+        await page.getByText("palm-sized").first().waitFor();
+        await capture(page, `coach-${tag}`);
+      }
       for (const route of (process.env.EXTRA_ROUTES ?? "").split(",").filter(Boolean)) {
         await page.goto(`${WEB}/app/${route}`);
         await capture(page, `${route.replace(/\W+/g, "-")}-${tag}`, { full: vpName === "mobile" });
