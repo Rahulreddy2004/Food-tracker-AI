@@ -8,7 +8,7 @@
 Candidates
   yours            your EfficientNetV2-B3 (classifier.onnx, else the .h5); Food-101 classes only
   siglip2-base     google/siglip2-base-patch16-224, zero-shot over all dishes
-  siglip2-so400m   google/siglip2-so400m-patch14-384, zero-shot over all dishes
+  siglip2-so400m   google/siglip2-so400m-patch14-384, zero-shot (opt-in: far too slow for CPU)
   clip-b16         openai/clip-vit-base-patch16, zero-shot (reference point)
   vit-food101      nateraw/food, a ViT fine-tuned on Food-101
   siglip2-food101  prithivMLmods/Food-101-93M, SigLIP 2 fine-tuned on Food-101
@@ -116,26 +116,36 @@ class TestSet:
 def _hf_test_set(
     name: str, title: str, repo: str, split: str, per_class: int | None, vocab: Vocab
 ) -> TestSet:
+    import io
+
+    from datasets import Image as ImageFeature
     from datasets import load_dataset
 
-    ds = load_dataset(repo, split=split)
-    names = ds.features["label"].names
-    if per_class:
-        seen: Counter[int] = Counter()
-        keep = []
-        for i, label in enumerate(ds["label"]):
-            if seen[label] < per_class:
-                keep.append(i)
-                seen[label] += 1
-        ds = ds.select(keep)
-    labels = [vocab.resolve(names[i]) for i in ds["label"]]
+    # Stream just this split (Food-101's training split alone is ~5 GB) and keep the encoded
+    # photos; they are decoded batch by batch while scoring.
+    stream = load_dataset(repo, split=split, streaming=True)
+    names = (stream.features or stream.info.features)["label"].names
+    stream = stream.cast_column("image", ImageFeature(decode=False))
+    photos: list[bytes] = []
+    label_ids: list[int] = []
+    seen: Counter[int] = Counter()
+    for row in stream:
+        label = row["label"]
+        if per_class and seen[label] >= per_class:
+            continue
+        seen[label] += 1
+        photos.append(row["image"]["bytes"])
+        label_ids.append(label)
+        if per_class and len(seen) == len(names) and min(seen.values()) >= per_class:
+            break  # every class is full; no need to read the rest of the split
+    labels = [vocab.resolve(names[i]) for i in label_ids]
     unknown = sorted({lab for lab in labels if lab not in vocab.display})
     if unknown:
         raise SystemExit(f"{name}: add these dishes (or aliases) to {EXTRA.name}: {unknown}")
 
     def batches(size: int) -> Iterator[list[Image.Image]]:
-        for batch in ds.iter(batch_size=size):
-            yield [im.convert("RGB") for im in batch["image"]]
+        for i in range(0, len(photos), size):
+            yield [Image.open(io.BytesIO(b)).convert("RGB") for b in photos[i : i + size]]
 
     return TestSet(name, title, f"{repo} [{split}]", labels, batches)
 
@@ -223,7 +233,8 @@ class ZeroShot:
         self.kind = f"zero-shot over {len(vocab.keys)} dishes"
         self.labels = vocab.keys
         self.model = AutoModel.from_pretrained(model_id).eval()
-        self.processor = AutoProcessor.from_pretrained(model_id)
+        # The slow processors are the ones these models were evaluated with.
+        self.processor = AutoProcessor.from_pretrained(model_id, use_fast=False)
         self.siglip = "siglip" in self.model.config.model_type
         # Only the image tower would be served; the dish embeddings are computed once, offline.
         self.size_mb = _torch_size_mb(self.model.vision_model)
@@ -233,9 +244,9 @@ class ZeroShot:
             ]
             text = torch.stack(per_template).mean(0)
             self.text = torch.nn.functional.normalize(text, dim=-1)
-        self.scale = float(self.model.logit_scale.exp())
+        self.scale = float(self.model.logit_scale.detach().exp())
         bias = getattr(self.model, "logit_bias", None)
-        self.bias = float(bias) if bias is not None else 0.0
+        self.bias = float(bias.detach()) if bias is not None else 0.0
 
     def _encode_text(self, texts: list[str]) -> Any:
         import torch
@@ -282,7 +293,7 @@ class FineTuned:
 
         self.name, self.model_id = name, model_id
         self.model = AutoModelForImageClassification.from_pretrained(model_id).eval()
-        self.processor = AutoImageProcessor.from_pretrained(model_id)
+        self.processor = AutoImageProcessor.from_pretrained(model_id, use_fast=False)
         id2label = self.model.config.id2label
         self.labels = [vocab.resolve(id2label[i]) for i in range(len(id2label))]
         unknown = [lab for lab in self.labels if lab not in vocab.display]
@@ -307,6 +318,10 @@ CANDIDATES: dict[str, Any] = {
     "vit-food101": lambda v: FineTuned("vit-food101", "nateraw/food", v),
     "siglip2-food101": lambda v: FineTuned("siglip2-food101", "prithivMLmods/Food-101-93M", v),
 }
+
+
+# siglip2-so400m is opt-in: ~5 s per photo on a 4-core runner, ~19 s per scan on Cloud Run's CPUs.
+DEFAULT_CANDIDATES = [name for name in CANDIDATES if name != "siglip2-so400m"]
 
 
 # --- Scoring ----------------------------------------------------------------------------------
@@ -499,7 +514,7 @@ def main() -> None:
     )
     parser.add_argument("--per-class", type=int, default=20, help="Food-101 photos per class")
     parser.add_argument("--indian-per-class", type=int, default=None, help="default: all")
-    parser.add_argument("--candidates", default=",".join(CANDIDATES))
+    parser.add_argument("--candidates", default=",".join(DEFAULT_CANDIDATES))
     parser.add_argument("--batch", type=int, default=16)
     parser.add_argument("--threads", type=int, default=os.cpu_count() or 4)
     args = parser.parse_args()

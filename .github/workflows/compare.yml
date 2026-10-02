@@ -12,8 +12,8 @@ on:
         default: "20"
         required: true
       candidates:
-        description: Comma-separated (yours, siglip2-base, siglip2-so400m, clip-b16, vit-food101, siglip2-food101)
-        default: yours,siglip2-base,siglip2-so400m,clip-b16,vit-food101,siglip2-food101
+        description: Comma-separated; add siglip2-so400m for the slow, most accurate zero-shot model
+        default: yours,siglip2-base,clip-b16,vit-food101,siglip2-food101
         required: true
   push:
     paths:
@@ -41,7 +41,7 @@ jobs:
       # A push only needs to prove the comparison works: a few photos per class.
       PER_CLASS: ${{ inputs.per_class || '2' }}
       INDIAN_PER_CLASS: ${{ github.event_name == 'push' && '3' || '' }}
-      CANDIDATES: ${{ inputs.candidates || 'yours,siglip2-base,siglip2-so400m,clip-b16,vit-food101,siglip2-food101' }}
+      CANDIDATES: ${{ inputs.candidates || 'yours,siglip2-base,clip-b16,vit-food101,siglip2-food101' }}
       HF_HUB_DISABLE_PROGRESS_BARS: "1"
       TOKENIZERS_PARALLELISM: "false"
     steps:
@@ -59,12 +59,6 @@ jobs:
       - name: Install (TensorFlow, PyTorch, Transformers)
         working-directory: ml
         run: uv sync
-
-      - uses: actions/cache@v6
-        with:
-          path: ~/.cache/huggingface
-          key: hf-${{ hashFiles('ml/compare.py') }}-${{ env.PER_CLASS }}
-          restore-keys: hf-
 
       - name: Compare
         working-directory: ml
