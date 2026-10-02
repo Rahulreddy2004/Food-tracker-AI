@@ -93,6 +93,7 @@ function CaloriesChart({ days, target }: { days: DaySummary[]; target: number })
       <div className="h-64 sm:h-72" aria-hidden>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
+            accessibilityLayer={false}
             data={data}
             margin={{ top: 16, right: 8, bottom: 0, left: -12 }}
             barCategoryGap={days.length > 31 ? "18%" : "28%"}

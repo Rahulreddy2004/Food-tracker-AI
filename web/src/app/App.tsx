@@ -6,6 +6,7 @@ import { ApiError } from "@/lib/api/client";
 import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider, useTheme } from "@/lib/theme";
 
+import { PwaUpdater } from "./PwaUpdater";
 import { router } from "./router";
 
 const queryClient = new QueryClient({
@@ -54,6 +55,7 @@ export function App() {
         <AuthProvider>
           <RouterProvider router={router} />
           <ThemedToaster />
+          {import.meta.env.PROD && <PwaUpdater />}
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>

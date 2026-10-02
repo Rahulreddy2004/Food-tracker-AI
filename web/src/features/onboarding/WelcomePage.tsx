@@ -9,6 +9,7 @@ import { CalorieRing, MacroSplit } from "@/components/nutrition";
 import { Button } from "@/components/ui/button";
 import { Segmented } from "@/components/ui/controls";
 import { Field, Input, Select } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { errorMessage } from "@/lib/api/client";
 import { useProfile, useSaveProfile } from "@/lib/api/queries";
 import type { Goal, Targets } from "@/lib/api/types";
@@ -297,14 +298,12 @@ export default function WelcomePage() {
                 <div className="grid gap-4">
                   <Field label="Calories per day" hint="We never suggest less than 1,200 kcal.">
                     {(p) => (
-                      <Input
-                        type="number"
-                        min={1200}
+                      <NumberInput
+                        min={800}
                         max={6000}
                         step={10}
                         value={current.kcal}
-                        onChange={(e) => {
-                          const kcal = Math.max(0, Number(e.target.value));
+                        onValueChange={(kcal) => {
                           const ratio = current.kcal ? kcal / current.kcal : 1;
                           setTargets({
                             kcal,
@@ -326,13 +325,11 @@ export default function WelcomePage() {
                         }
                       >
                         {(p) => (
-                          <Input
-                            type="number"
+                          <NumberInput
                             min={0}
+                            max={1500}
                             value={current[key]}
-                            onChange={(e) =>
-                              setTargets({ ...current, [key]: Math.max(0, Number(e.target.value)) })
-                            }
+                            onValueChange={(v) => setTargets({ ...current, [key]: v })}
                             {...p}
                           />
                         )}

@@ -1,6 +1,7 @@
 import { useId } from "react";
 
 import { Slider } from "@/components/ui/controls";
+import { NumberInput } from "@/components/ui/number-input";
 import { cn } from "@/lib/cn";
 
 interface PortionEditorProps {
@@ -31,15 +32,13 @@ export function PortionEditor({
           Portion
         </label>
         <div className="flex items-center gap-1.5">
-          <input
+          <NumberInput
             id={id}
-            type="number"
-            inputMode="numeric"
             min={1}
             max={3000}
-            value={Math.round(grams)}
-            onChange={(e) => onChange(clamp(Number(e.target.value) || 1))}
-            className="h-9 w-20 rounded-md border border-line-strong bg-surface px-2 text-right font-medium tabular focus-visible:border-primary focus-visible:outline-none"
+            value={grams}
+            onValueChange={(g) => onChange(clamp(g))}
+            className="h-9 w-20 px-2 text-right font-medium tabular"
           />
           <span className="text-sm text-ink-muted">g</span>
         </div>
@@ -65,7 +64,7 @@ export function PortionEditor({
               className={cn(
                 "h-8 rounded-full border px-3 text-sm transition-colors",
                 active
-                  ? "border-primary bg-primary-soft text-primary"
+                  ? "border-primary bg-primary-soft text-primary-ink"
                   : "border-line-strong text-ink-muted hover:text-ink",
               )}
             >

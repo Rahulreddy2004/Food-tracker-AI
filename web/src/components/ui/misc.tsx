@@ -10,8 +10,8 @@ export const badgeVariants = cva(
     variants: {
       tone: {
         neutral: "bg-surface-2 text-ink-muted",
-        primary: "bg-primary-soft text-primary",
-        secondary: "bg-secondary-soft text-secondary",
+        primary: "bg-primary-soft text-primary-ink",
+        secondary: "bg-secondary-soft text-secondary-ink",
         accent: "bg-accent-soft text-warning",
         danger: "bg-danger-soft text-danger",
         outline: "border border-line-strong text-ink-muted",

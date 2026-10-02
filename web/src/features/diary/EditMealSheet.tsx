@@ -6,6 +6,7 @@ import { FoodIcon } from "@/components/nutrition";
 import { Button } from "@/components/ui/button";
 import { Segmented } from "@/components/ui/controls";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { ResponsiveSheet } from "@/components/ui/overlays";
 import { errorMessage } from "@/lib/api/client";
 import { useUpdateMeal } from "@/lib/api/queries";
@@ -77,11 +78,12 @@ export function EditMealSheet({ meal, onClose }: { meal: Meal | null; onClose: (
                 >
                   <Minus />
                 </Button>
-                <Input
+                <NumberInput
                   aria-label={`${item.display} grams`}
-                  type="number"
-                  value={Math.round(item.grams)}
-                  onChange={(e) => setGrams(i, Number(e.target.value) || 1)}
+                  min={1}
+                  max={5000}
+                  value={item.grams}
+                  onValueChange={(g) => setGrams(i, g)}
                   className="h-9 w-16 px-2 text-center tabular"
                 />
                 <Button

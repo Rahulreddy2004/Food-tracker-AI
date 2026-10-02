@@ -12,7 +12,7 @@ import {
   SlidersHorizontal,
   Trash2,
 } from "lucide-react";
-import { useDeferredValue, useMemo, useState } from "react";
+import { lazy, Suspense, useDeferredValue, useMemo, useState } from "react";
 import { Link } from "react-router";
 
 import { Logo, Squiggle } from "@/components/brand";
@@ -23,7 +23,21 @@ import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/cn";
 import { useTitle } from "@/lib/useTitle";
 
-import { DemoScan } from "./DemoScan";
+const DemoScan = lazy(() => import("./DemoScan").then((m) => ({ default: m.DemoScan })));
+
+function DemoPlaceholder() {
+  return (
+    <div className="mx-auto aspect-square w-full max-w-[34rem] overflow-hidden rounded-xl border border-line bg-surface-3 shadow-lift">
+      <img
+        src="/images/palak-paneer-640.webp"
+        alt=""
+        width={640}
+        height={640}
+        className="h-full w-full object-cover"
+      />
+    </div>
+  );
+}
 
 function Nav() {
   const { user } = useAuth();
@@ -74,7 +88,7 @@ function Nav() {
 function Hero() {
   return (
     <section className="container-app grid items-center gap-16 pt-6 pb-24 lg:grid-cols-[1.05fr_1fr] lg:pt-14">
-      <div className="animate-fade-up">
+      <div>
         <p className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-sm font-medium text-ink-muted shadow-soft">
           <span className="size-2 rounded-full bg-secondary" /> Food recognition + a friendly
           nutrition coach
@@ -111,7 +125,9 @@ function Hero() {
           )}
         </ul>
       </div>
-      <DemoScan />
+      <Suspense fallback={<DemoPlaceholder />}>
+        <DemoScan />
+      </Suspense>
     </section>
   );
 }
@@ -272,6 +288,8 @@ function Accuracy() {
           <ul
             className="mt-5 flex max-h-80 flex-wrap gap-2 overflow-y-auto pr-1"
             aria-live="polite"
+            aria-label="Dishes"
+            tabIndex={0}
           >
             {shown.map((d) => (
               <li key={d.name} className="rounded-full bg-bg/10 px-3 py-1 text-sm text-bg/90">
@@ -339,7 +357,7 @@ function FinalCta() {
         <h2 className="relative max-w-xl text-[2.4rem] leading-tight font-semibold">
           Your next meal is the easiest one to log.
         </h2>
-        <p className="relative mt-3 max-w-lg text-primary-fg/85">
+        <p className="relative mt-3 max-w-lg text-primary-fg">
           Free to use. Set up in a minute. Works on your phone and laptop.
         </p>
         <Button asChild size="lg" variant="secondary" className="relative mt-8 border-transparent">

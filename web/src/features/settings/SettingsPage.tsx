@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Segmented } from "@/components/ui/controls";
 import { Field, Input, Select } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Skeleton } from "@/components/ui/misc";
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from "@/components/ui/overlays";
 import { api, authHeaders, call, errorMessage } from "@/lib/api/client";
@@ -52,7 +53,10 @@ function ProfileForm({ profile }: { profile: Profile }) {
   const save = useSaveProfile();
   const [draft, setDraft] = useState<Profile>(profile);
   // Browsers list some zones under older aliases (Chrome: Asia/Calcutta), so always include the saved one.
-  const zones = useMemo(() => [...new Set([profile.timezone, ...allTimeZones()])].sort(), [profile.timezone]);
+  const zones = useMemo(
+    () => [...new Set([profile.timezone, ...allTimeZones()])].sort(),
+    [profile.timezone],
+  );
   const set = <K extends keyof Profile>(key: K, value: Profile[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
   const setTarget = (key: keyof Targets, value: number) =>
@@ -196,11 +200,11 @@ function ProfileForm({ profile }: { profile: Profile }) {
           ).map(([key, label]) => (
             <Field key={key} label={label}>
               {(p) => (
-                <Input
-                  type="number"
+                <NumberInput
                   min={0}
+                  max={key === "kcal" ? 10000 : 1500}
                   value={draft.targets[key]}
-                  onChange={(e) => setTarget(key, Number(e.target.value))}
+                  onValueChange={(v) => setTarget(key, v)}
                   {...p}
                 />
               )}

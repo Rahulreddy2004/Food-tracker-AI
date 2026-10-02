@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Segmented } from "@/components/ui/controls";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Skeleton, Spinner } from "@/components/ui/misc";
 import { ApiError, errorMessage } from "@/lib/api/client";
 import { useBarcode, useCreateMeal, useTimeZone, useToday } from "@/lib/api/queries";
@@ -152,17 +153,15 @@ function ProductCard({ product, onLogged }: { product: Product; onLogged: () => 
           >
             <Minus />
           </Button>
-          <Input
+          <NumberInput
+            key={unit}
             aria-label={unit === "serving" ? "Servings" : "Grams"}
-            type="number"
             min={unit === "serving" ? 0.5 : 1}
+            max={unit === "serving" ? 50 : 5000}
             step={unit === "serving" ? 0.5 : 5}
+            decimals={unit === "serving" ? 1 : 0}
             value={unit === "serving" ? servings : grams}
-            onChange={(e) =>
-              unit === "serving"
-                ? setServings(Math.max(0.5, Number(e.target.value) || 0.5))
-                : setGrams(Math.max(1, Number(e.target.value) || 1))
-            }
+            onValueChange={unit === "serving" ? setServings : setGrams}
             className="w-28 text-center text-lg font-semibold tabular"
           />
           <Button

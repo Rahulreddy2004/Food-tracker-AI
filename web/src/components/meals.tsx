@@ -140,7 +140,7 @@ export function MealSections({ meals, timeZone, onAdd, onEdit, onDelete }: MealS
               <button
                 type="button"
                 onClick={() => onAdd(value)}
-                className="flex h-12 items-center justify-center gap-2 rounded-lg border border-dashed border-line-strong text-sm font-medium text-ink-muted transition-colors hover:border-primary hover:bg-primary-soft/40 hover:text-primary"
+                className="flex h-12 items-center justify-center gap-2 rounded-lg border border-dashed border-line-strong text-sm font-medium text-ink-muted transition-colors hover:border-primary hover:bg-primary-soft/40 hover:text-primary-ink"
               >
                 <Plus className="size-4" /> Add {label.toLowerCase()}
               </button>

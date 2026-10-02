@@ -1,5 +1,5 @@
-import { type FirebaseApp, type FirebaseOptions, initializeApp } from "firebase/app";
-import { type Auth, connectAuthEmulator, getAuth } from "firebase/auth";
+import type { FirebaseApp, FirebaseOptions } from "firebase/app";
+import type { Auth } from "firebase/auth";
 
 import { firebaseEnv } from "@/lib/env";
 
@@ -28,14 +28,17 @@ async function loadConfig(): Promise<FirebaseOptions> {
 }
 
 export function getFirebaseApp(): Promise<FirebaseApp> {
-  appPromise ??= loadConfig().then((config) => initializeApp(config));
+  appPromise ??= Promise.all([loadConfig(), import("firebase/app")]).then(
+    ([config, { initializeApp }]) => initializeApp(config),
+  );
   return appPromise;
 }
 
 let authPromise: Promise<Auth> | null = null;
 
 export function getFirebaseAuth(): Promise<Auth> {
-  authPromise ??= getFirebaseApp().then((app) => {
+  authPromise ??= Promise.all([getFirebaseApp(), import("firebase/auth")]).then(([app, sdk]) => {
+    const { getAuth, connectAuthEmulator } = sdk;
     const auth = getAuth(app);
     if (firebaseEnv.authEmulator) {
       connectAuthEmulator(auth, firebaseEnv.authEmulator, { disableWarnings: true });

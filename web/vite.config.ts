@@ -37,7 +37,8 @@ export default defineConfig({
       workbox: {
         // Cache the app shell only. API calls always go to the network.
         globPatterns: ["**/*.{js,css,html,svg,png,webp,woff2}"],
-        navigateFallback: "/index.html",
+        // App routes fall back to the SPA shell; "/" is the prerendered landing page.
+        navigateFallback: "/app.html",
         navigateFallbackDenylist: [/^\/__\//],
       },
     }),
@@ -51,10 +52,30 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ["react", "react-dom", "react-router"],
-          firebase: ["firebase/app", "firebase/auth"],
-          charts: ["recharts"],
+        // Function form: only these packages go in each chunk (the object form also pulls in
+        // their shared dependencies, which made the entry wait for the charts chunk).
+        manualChunks(id) {
+          // Rollup's shared CommonJS helper must live with the always-loaded React chunk.
+          if (id.includes("commonjsHelpers")) return "react";
+          if (!id.includes("node_modules")) return undefined;
+          // Small helpers used everywhere (recharts uses clsx too) belong to the core chunk.
+          if (/[\\/]node_modules[\\/]\.pnpm[\\/](clsx|tailwind-merge)@/.test(id)) return "react";
+          if (
+            /[\\/]node_modules[\\/]\.pnpm[\\/](recharts|d3-|victory-vendor|@reduxjs|redux|react-redux|immer|reselect|decimal\.js)/.test(
+              id,
+            )
+          )
+            return "charts";
+          if (/@firebase[\\/+]storage|firebase[\\/]storage/.test(id)) return "firebase-storage";
+          if (
+            /[\\/]node_modules[\\/]\.pnpm[\\/](@firebase\+(app|auth|component|util|logger)|firebase@)/.test(
+              id,
+            )
+          )
+            return "firebase";
+          if (/[\\/]node_modules[\\/]\.pnpm[\\/](react|react-dom|react-router|scheduler)@/.test(id))
+            return "react";
+          return undefined;
         },
       },
     },

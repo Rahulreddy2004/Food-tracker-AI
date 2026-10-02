@@ -109,7 +109,7 @@ export default function TodayPage() {
             </span>
             <span className="min-w-0">
               <span className="block font-display text-2xl font-semibold">Scan a meal</span>
-              <span className="block text-sm text-primary-fg/85">
+              <span className="block text-sm text-primary-fg">
                 Photo → foods → calories, in seconds
               </span>
             </span>

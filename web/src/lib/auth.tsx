@@ -1,14 +1,4 @@
-import {
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  onIdTokenChanged,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut as fbSignOut,
-  updateProfile,
-  type User,
-} from "firebase/auth";
+import type { User } from "firebase/auth";
 import { createContext, type ReactNode, use, useEffect, useMemo, useState } from "react";
 
 import { getFirebaseAuth } from "@/lib/firebase";
@@ -33,8 +23,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
-    getFirebaseAuth()
-      .then((auth) => {
+    Promise.all([getFirebaseAuth(), import("firebase/auth")])
+      .then(([auth, { onIdTokenChanged }]) => {
         unsubscribe = onIdTokenChanged(auth, (next) => {
           setUser(next);
           setLoading(false);
@@ -53,20 +43,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       error,
       async signIn(email, password) {
+        const { signInWithEmailAndPassword } = await import("firebase/auth");
         await signInWithEmailAndPassword(await getFirebaseAuth(), email, password);
       },
       async signUp(name, email, password) {
+        const { createUserWithEmailAndPassword, updateProfile } = await import("firebase/auth");
         const cred = await createUserWithEmailAndPassword(await getFirebaseAuth(), email, password);
         if (name) await updateProfile(cred.user, { displayName: name });
       },
       async signInWithGoogle() {
+        const { signInWithPopup, GoogleAuthProvider } = await import("firebase/auth");
         await signInWithPopup(await getFirebaseAuth(), new GoogleAuthProvider());
       },
       async resetPassword(email) {
+        const { sendPasswordResetEmail } = await import("firebase/auth");
         await sendPasswordResetEmail(await getFirebaseAuth(), email);
       },
       async signOut() {
-        await fbSignOut(await getFirebaseAuth());
+        const { signOut } = await import("firebase/auth");
+        await signOut(await getFirebaseAuth());
       },
     }),
     [user, loading, error],

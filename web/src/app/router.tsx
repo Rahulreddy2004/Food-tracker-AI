@@ -1,7 +1,8 @@
 import type { ComponentType } from "react";
 import { createBrowserRouter } from "react-router";
 
-import { AppShell } from "./AppShell";
+import LandingPage from "@/features/landing/LandingPage";
+
 import { NotFound, RouteError } from "./RouteError";
 import { RedirectIfSignedIn, RequireAuth } from "./guards";
 
@@ -12,7 +13,8 @@ export const router = createBrowserRouter([
   {
     errorElement: <RouteError />,
     children: [
-      { path: "/", lazy: page(() => import("@/features/landing/LandingPage")) },
+      // Eager: the public landing page should paint without waiting for another chunk.
+      { path: "/", element: <LandingPage /> },
       {
         element: <RedirectIfSignedIn />,
         children: [
@@ -27,7 +29,7 @@ export const router = createBrowserRouter([
           { path: "/welcome", lazy: page(() => import("@/features/onboarding/WelcomePage")) },
           {
             path: "/app",
-            element: <AppShell />,
+            lazy: async () => ({ Component: (await import("./AppShell")).AppShell }),
             children: [
               { index: true, lazy: page(() => import("@/features/today/TodayPage")) },
               { path: "scan", lazy: page(() => import("@/features/scan/ScanPage")) },

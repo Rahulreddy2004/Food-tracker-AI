@@ -61,7 +61,7 @@ function updateItem(
   return { ...state, items: state.items.map((it) => (it.key === key ? fn(it) : it)) };
 }
 
-function reducer(state: ScanState, action: Action): ScanState {
+export function scanReducer(state: ScanState, action: Action): ScanState {
   switch (action.type) {
     case "analyze":
       return { stage: "analyzing", image: action.image };
@@ -151,7 +151,7 @@ function reducer(state: ScanState, action: Action): ScanState {
 }
 
 export function useScanFlow() {
-  return useReducer(reducer, { stage: "capture" } as ScanState);
+  return useReducer(scanReducer, { stage: "capture" } as ScanState);
 }
 
 /** What the item currently represents, normalised for display and saving. */

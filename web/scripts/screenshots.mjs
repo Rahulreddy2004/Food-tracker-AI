@@ -8,7 +8,9 @@ import { chromium } from "@playwright/test";
 const WEB = process.env.WEB_URL ?? "http://127.0.0.1:5173";
 const API = process.env.API_URL ?? "http://127.0.0.1:8000";
 const AUTH = process.env.AUTH_EMULATOR ?? "http://127.0.0.1:9099";
-const out = resolve(process.argv[2] && !process.argv[2].startsWith("--") ? process.argv[2] : "screenshots");
+const out = resolve(
+  process.argv[2] && !process.argv[2].startsWith("--") ? process.argv[2] : "screenshots",
+);
 const pagesArg = process.argv.find((a) => a.startsWith("--pages="));
 const only = pagesArg ? new Set(pagesArg.slice(8).split(",")) : null;
 const want = (name) => !only || only.has(name);
@@ -20,11 +22,14 @@ const VIEWPORTS = {
 };
 
 async function signUp(email, password, name) {
-  const res = await fetch(`${AUTH}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-api-key`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, displayName: name, returnSecureToken: true }),
-  });
+  const res = await fetch(
+    `${AUTH}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-api-key`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, displayName: name, returnSecureToken: true }),
+    },
+  );
   if (!res.ok) throw new Error(`sign-up failed: ${await res.text()}`);
   const { idToken } = await res.json();
   await fetch(`${AUTH}/identitytoolkit.googleapis.com/v1/accounts:update?key=demo-api-key`, {
@@ -51,7 +56,12 @@ function day(offset = 0) {
 }
 
 const item = (name, display, group, grams, kcal, p, f, c) => ({
-  name, display, group, label: name, grams, per100g: { kcal, proteinG: p, fatG: f, carbsG: c },
+  name,
+  display,
+  group,
+  label: name,
+  grams,
+  per100g: { kcal, proteinG: p, fatG: f, carbsG: c },
 });
 
 async function seed(token) {
@@ -64,16 +74,54 @@ async function seed(token) {
     onboarded: true,
   });
   const meals = [
-    [0, "breakfast", [item("pancakes", "Pancakes", "Breakfast", 150, 227, 6.4, 9.7, 28.3), item("omelette", "Omelette", "Breakfast", 120, 155, 10.5, 12, 1)]],
-    [0, "lunch", [item("caesar_salad", "Caesar salad", "Salad", 220, 145, 5.5, 11.5, 6.5), item("garlic_bread", "Garlic bread", "Side Dish", 60, 350, 8, 16, 42)]],
+    [
+      0,
+      "breakfast",
+      [
+        item("pancakes", "Pancakes", "Breakfast", 150, 227, 6.4, 9.7, 28.3),
+        item("omelette", "Omelette", "Breakfast", 120, 155, 10.5, 12, 1),
+      ],
+    ],
+    [
+      0,
+      "lunch",
+      [
+        item("caesar_salad", "Caesar salad", "Salad", 220, 145, 5.5, 11.5, 6.5),
+        item("garlic_bread", "Garlic bread", "Side Dish", 60, 350, 8, 16, 42),
+      ],
+    ],
     [-1, "dinner", [item("chicken_curry", "Chicken curry", "Curry", 320, 150, 12, 8.5, 6.5)]],
   ];
   for (let offset = -13; offset <= -2; offset++) {
-    meals.push([offset, "lunch", [item("fried_rice", "Fried rice", "Rice Dish", 250 + ((offset * 37) % 120), 165, 4.5, 5.5, 25)]]);
-    meals.push([offset, "dinner", [item("pizza", "Pizza", "Pizza", 180 + ((offset * 53) % 160), 266, 11.4, 10.4, 33)]]);
+    meals.push([
+      offset,
+      "lunch",
+      [
+        item(
+          "fried_rice",
+          "Fried rice",
+          "Rice Dish",
+          250 + ((offset * 37) % 120),
+          165,
+          4.5,
+          5.5,
+          25,
+        ),
+      ],
+    ]);
+    meals.push([
+      offset,
+      "dinner",
+      [item("pizza", "Pizza", "Pizza", 180 + ((offset * 53) % 160), 266, 11.4, 10.4, 33)],
+    ]);
   }
   for (const [offset, mealType, items] of meals) {
-    await api(token, "POST", "/v1/meals", { localDate: day(offset), mealType, source: "scan", items });
+    await api(token, "POST", "/v1/meals", {
+      localDate: day(offset),
+      mealType,
+      source: "scan",
+      items,
+    });
   }
 }
 
@@ -149,7 +197,9 @@ for (const scheme of ["light", "dark"]) {
       await capture(page, `today-${tag}`, { full: vpName === "mobile" });
       if (want("scan")) {
         await page.goto(`${WEB}/app/scan?source=upload`);
-        await page.locator('input[type="file"]').setInputFiles(resolve("public/images/palak-paneer-640.webp"));
+        await page
+          .locator('input[type="file"]')
+          .setInputFiles(resolve("public/images/palak-paneer-640.webp"));
         await page.getByRole("button", { name: /Log meal/ }).waitFor();
         await capture(page, `scan-review-${tag}`, { full: vpName === "mobile" });
       }

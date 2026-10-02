@@ -97,7 +97,7 @@ export function ReviewItemCard({
             <button
               type="button"
               onClick={onConfirm}
-              className="font-semibold text-primary underline-offset-2 hover:underline"
+              className="font-semibold text-primary-ink underline underline-offset-2"
             >
               keep “{top.display}”
             </button>
@@ -132,7 +132,7 @@ export function ReviewItemCard({
                 <span
                   className={cn(
                     "tabular",
-                    item.choice === i ? "text-primary-fg/80" : "text-ink-subtle",
+                    item.choice === i ? "text-primary-fg" : "text-ink-subtle",
                   )}
                 >
                   {Math.round(p.confidence * 100)}%

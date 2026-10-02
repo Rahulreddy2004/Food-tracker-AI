@@ -11,7 +11,7 @@
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "cleanUrls": true,
     "trailingSlash": false,
-    "rewrites": [{ "source": "**", "destination": "/index.html" }],
+    "rewrites": [{ "source": "**", "destination": "/app.html" }],
     "headers": [
       {
         "source": "**",
@@ -33,7 +33,7 @@
         "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
       },
       {
-        "source": "/@(index.html|sw.js|manifest.webmanifest)",
+        "source": "/@(index.html|app.html|sw.js|manifest.webmanifest)",
         "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
       }
     ]
