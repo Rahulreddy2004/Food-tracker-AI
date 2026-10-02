@@ -264,8 +264,9 @@ class ZeroShot:
         import torch
 
         with torch.inference_mode():
-            pixels = self.processor(images=images, return_tensors="pt")["pixel_values"]
-            img = self.model.get_image_features(pixel_values=pixels)
+            # All processor outputs: SigLIP 2's variable-resolution models also need spatial shapes.
+            inputs = self.processor(images=images, return_tensors="pt")
+            img = self.model.get_image_features(**inputs)
             img = torch.nn.functional.normalize(img, dim=-1)
             logits = (img @ self.text.T) * self.scale + self.bias
         return _softmax(logits.numpy().astype(np.float64)).astype(np.float32)
@@ -293,8 +294,8 @@ class FineTuned:
         import torch
 
         with torch.inference_mode():
-            pixels = self.processor(images=images, return_tensors="pt")["pixel_values"]
-            logits = self.model(pixel_values=pixels).logits
+            inputs = self.processor(images=images, return_tensors="pt")
+            logits = self.model(**inputs).logits
         return _softmax(logits.numpy().astype(np.float64)).astype(np.float32)
 
 
