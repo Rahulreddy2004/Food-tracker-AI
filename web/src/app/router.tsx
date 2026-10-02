@@ -4,7 +4,7 @@ import { createBrowserRouter } from "react-router";
 import LandingPage from "@/features/landing/LandingPage";
 
 import { NotFound, RouteError } from "./RouteError";
-import { RedirectIfSignedIn, RequireAuth } from "./guards";
+import { RedirectIfSignedIn, RequireAuth, Splash } from "./guards";
 
 type Lazy = () => Promise<{ default: ComponentType }>;
 const page = (load: Lazy) => async () => ({ Component: (await load()).default });
@@ -12,6 +12,8 @@ const page = (load: Lazy) => async () => ({ Component: (await load()).default })
 export const router = createBrowserRouter([
   {
     errorElement: <RouteError />,
+    // Shown while a page opened directly (or reloaded) loads its code, instead of a blank screen.
+    HydrateFallback: Splash,
     children: [
       // Eager: the public landing page should paint without waiting for another chunk.
       { path: "/", element: <LandingPage /> },

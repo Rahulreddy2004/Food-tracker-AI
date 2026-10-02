@@ -7,6 +7,8 @@ import uuid
 import anyio
 
 from app.core.errors import ApiError
+from app.ml.classifier import FakeClassifier
+from app.ml.detector import FakeDetector
 from app.ml.labels import LabelSet
 from app.ml.pipeline import ScanPipeline
 from app.ml.portion import PortionEstimator
@@ -108,5 +110,10 @@ class ScanService:
                 classify_ms=t.classify_ms,
                 total_ms=t.total_ms,
             ),
-            models=ModelInfo(detector=pipeline.detector.name, classifier=pipeline.classifier.name),
+            models=ModelInfo(
+                detector=pipeline.detector.name,
+                classifier=pipeline.classifier.name,
+                demo=isinstance(pipeline.detector, FakeDetector)
+                or isinstance(pipeline.classifier, FakeClassifier),
+            ),
         )

@@ -35,6 +35,9 @@ class ScanTimings(ApiModel):
 class ModelInfo(ApiModel):
     detector: str
     classifier: str
+    demo: bool = Field(
+        description="True when stand-in models answered (MODEL_BACKEND=fake); they ignore the photo"
+    )
 
 
 class ScanResponse(ApiModel):

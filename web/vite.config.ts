@@ -47,6 +47,9 @@ export default defineConfig({
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
   server: { port: 5173, strictPort: true },
+  // Pre-bundled at startup: the barcode scanner imports these only on demand, and finding them
+  // mid-session makes the dev server re-bundle and reload every open page.
+  optimizeDeps: { include: ["@zxing/browser", "@zxing/library"] },
   build: {
     target: "es2022",
     sourcemap: true,

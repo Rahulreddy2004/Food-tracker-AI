@@ -35,7 +35,11 @@ async def test_scan_returns_items_with_nutrition(
     assert top["suggestedGrams"] > 0 and top["portionMethod"] == "box_area"
     # The third fake item is a 34% guess → it must ask the user to confirm.
     assert [i["needsConfirmation"] for i in body["items"]].count(True) == 1
-    assert body["models"] == {"detector": "fake-detector", "classifier": "fake-classifier"}
+    assert body["models"] == {
+        "detector": "fake-detector",
+        "classifier": "fake-classifier",
+        "demo": True,
+    }
 
 
 async def test_scan_rejects_bad_uploads(client: httpx.AsyncClient, container: Container) -> None:
