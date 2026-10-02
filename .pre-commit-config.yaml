@@ -1,0 +1,38 @@
+# Install once:  pipx install pre-commit && pre-commit install
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-json
+        exclude: tsconfig.*\.json$
+
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: ruff format (api)
+        entry: bash -c 'cd api && uv run ruff format app tests'
+        language: system
+        files: ^api/.*\.py$
+        pass_filenames: false
+      - id: ruff-check
+        name: ruff check (api)
+        entry: bash -c 'cd api && uv run ruff check --fix app tests'
+        language: system
+        files: ^api/.*\.py$
+        pass_filenames: false
+      - id: web-lint
+        name: eslint + prettier (web)
+        entry: bash -c 'cd web && pnpm exec prettier --write --log-level warn . && pnpm exec eslint --fix .'
+        language: system
+        files: ^web/.*\.(ts|tsx|css|json)$
+        pass_filenames: false

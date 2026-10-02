@@ -1,0 +1,19 @@
+rules_version = '2';
+
+// Meal photo thumbnails: users/{uid}/meals/{file}. Only the owner can read or write them,
+// only small images are accepted, and nothing else in the bucket is reachable from browsers.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /users/{uid}/meals/{file} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.size < 2 * 1024 * 1024
+        && request.resource.contentType.matches('image/(webp|jpeg|png)');
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

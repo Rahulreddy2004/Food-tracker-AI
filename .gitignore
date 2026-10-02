@@ -1,13 +1,56 @@
-# Huge files
+# Secrets — never commit these
+.env
+.env.*
+!.env.example
+serviceAccountKey.json
+*-service-account*.json
+
+# Model weights (downloaded with scripts/fetch_models.py)
 *.h5
+*.keras
 *.pt
 *.pth
+*.onnx
+*.tflite
+api/models/*
+!api/models/manifest.json
+!api/models/README.md
 
-# Secrets
-serviceAccountKey.json
-
-# Dependencies
-node_modules/
-venv/
+# Python
 __pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+dev-dist/
+*.tsbuildinfo
+web/src/lib/api/openapi.json
+
+# Test output
+web/test-results/
+web/playwright-report/
+web/blob-report/
+.lighthouseci/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+database-debug.log
+pubsub-debug.log
+emulator-data/
+
+# Editors / OS
 .DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp

@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main, v2]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Scan the working tree with gitleaks
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz | tar -xz gitleaks
+          ./gitleaks dir . --no-banner --redact --exit-code 1
+
+  api:
+    name: API — lint, types, tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+          cache-dependency-glob: api/uv.lock
+      - run: uv sync --locked
+      - run: uv run ruff format --check app tests
+      - run: uv run ruff check app tests
+      - run: uv run mypy app
+      - run: uv run pytest -q
+      - name: Audit dependencies
+        run: uv export --locked --no-dev --no-hashes -o /tmp/requirements.txt && uv run pip-audit -r /tmp/requirements.txt --disable-pip
+
+  api-emulators:
+    name: API — Firebase emulator tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+          cache-dependency-glob: api/uv.lock
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - run: npm install -g firebase-tools
+      - run: cd api && uv sync --locked
+      - name: Run emulator tests
+        run: >
+          firebase emulators:exec --project demo-foodtracker --only auth,firestore
+          "cd api && FIREBASE_PROJECT_ID=demo-foodtracker uv run pytest -m emulator -q"

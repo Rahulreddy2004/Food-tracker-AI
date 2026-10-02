@@ -1,0 +1,612 @@
+{
+  "version": 1,
+  "description": "Food-101 classes in the output order of food101_EfficientNetV2B3_final.h5 (index = model output index).",
+  "classes": [
+    {
+      "id": 0,
+      "name": "apple_pie",
+      "display": "Apple pie",
+      "group": "Dessert"
+    },
+    {
+      "id": 1,
+      "name": "baby_back_ribs",
+      "display": "Baby back ribs",
+      "group": "Meat"
+    },
+    {
+      "id": 2,
+      "name": "baklava",
+      "display": "Baklava",
+      "group": "Dessert"
+    },
+    {
+      "id": 3,
+      "name": "beef_carpaccio",
+      "display": "Beef carpaccio",
+      "group": "Meat"
+    },
+    {
+      "id": 4,
+      "name": "beef_tartare",
+      "display": "Beef tartare",
+      "group": "Meat"
+    },
+    {
+      "id": 5,
+      "name": "beet_salad",
+      "display": "Beet salad",
+      "group": "Salad"
+    },
+    {
+      "id": 6,
+      "name": "beignets",
+      "display": "Beignets",
+      "group": "Dessert"
+    },
+    {
+      "id": 7,
+      "name": "bibimbap",
+      "display": "Bibimbap",
+      "group": "Rice Dish"
+    },
+    {
+      "id": 8,
+      "name": "bread_pudding",
+      "display": "Bread pudding",
+      "group": "Dessert"
+    },
+    {
+      "id": 9,
+      "name": "breakfast_burrito",
+      "display": "Breakfast burrito",
+      "group": "Breakfast"
+    },
+    {
+      "id": 10,
+      "name": "bruschetta",
+      "display": "Bruschetta",
+      "group": "Appetizer"
+    },
+    {
+      "id": 11,
+      "name": "caesar_salad",
+      "display": "Caesar salad",
+      "group": "Salad"
+    },
+    {
+      "id": 12,
+      "name": "cannoli",
+      "display": "Cannoli",
+      "group": "Dessert"
+    },
+    {
+      "id": 13,
+      "name": "caprese_salad",
+      "display": "Caprese salad",
+      "group": "Salad"
+    },
+    {
+      "id": 14,
+      "name": "carrot_cake",
+      "display": "Carrot cake",
+      "group": "Dessert"
+    },
+    {
+      "id": 15,
+      "name": "ceviche",
+      "display": "Ceviche",
+      "group": "Seafood"
+    },
+    {
+      "id": 16,
+      "name": "cheesecake",
+      "display": "Cheesecake",
+      "group": "Dessert"
+    },
+    {
+      "id": 17,
+      "name": "cheese_plate",
+      "display": "Cheese plate",
+      "group": "Appetizer"
+    },
+    {
+      "id": 18,
+      "name": "chicken_curry",
+      "display": "Chicken curry",
+      "group": "Curry"
+    },
+    {
+      "id": 19,
+      "name": "chicken_quesadilla",
+      "display": "Chicken quesadilla",
+      "group": "Tex-Mex"
+    },
+    {
+      "id": 20,
+      "name": "chicken_wings",
+      "display": "Chicken wings",
+      "group": "Appetizer"
+    },
+    {
+      "id": 21,
+      "name": "chocolate_cake",
+      "display": "Chocolate cake",
+      "group": "Dessert"
+    },
+    {
+      "id": 22,
+      "name": "chocolate_mousse",
+      "display": "Chocolate mousse",
+      "group": "Dessert"
+    },
+    {
+      "id": 23,
+      "name": "churros",
+      "display": "Churros",
+      "group": "Dessert"
+    },
+    {
+      "id": 24,
+      "name": "clam_chowder",
+      "display": "Clam chowder",
+      "group": "Soup"
+    },
+    {
+      "id": 25,
+      "name": "club_sandwich",
+      "display": "Club sandwich",
+      "group": "Sandwich"
+    },
+    {
+      "id": 26,
+      "name": "crab_cakes",
+      "display": "Crab cakes",
+      "group": "Seafood"
+    },
+    {
+      "id": 27,
+      "name": "creme_brulee",
+      "display": "Crème brûlée",
+      "group": "Dessert"
+    },
+    {
+      "id": 28,
+      "name": "croque_madame",
+      "display": "Croque madame",
+      "group": "Breakfast"
+    },
+    {
+      "id": 29,
+      "name": "cup_cakes",
+      "display": "Cupcakes",
+      "group": "Dessert"
+    },
+    {
+      "id": 30,
+      "name": "deviled_eggs",
+      "display": "Deviled eggs",
+      "group": "Appetizer"
+    },
+    {
+      "id": 31,
+      "name": "donuts",
+      "display": "Donuts",
+      "group": "Dessert"
+    },
+    {
+      "id": 32,
+      "name": "dumplings",
+      "display": "Dumplings",
+      "group": "Appetizer"
+    },
+    {
+      "id": 33,
+      "name": "edamame",
+      "display": "Edamame",
+      "group": "Appetizer"
+    },
+    {
+      "id": 34,
+      "name": "eggs_benedict",
+      "display": "Eggs Benedict",
+      "group": "Breakfast"
+    },
+    {
+      "id": 35,
+      "name": "escargots",
+      "display": "Escargots",
+      "group": "Appetizer"
+    },
+    {
+      "id": 36,
+      "name": "falafel",
+      "display": "Falafel",
+      "group": "Vegetarian"
+    },
+    {
+      "id": 37,
+      "name": "filet_mignon",
+      "display": "Filet mignon",
+      "group": "Meat"
+    },
+    {
+      "id": 38,
+      "name": "fish_and_chips",
+      "display": "Fish and chips",
+      "group": "Seafood"
+    },
+    {
+      "id": 39,
+      "name": "foie_gras",
+      "display": "Foie gras",
+      "group": "Appetizer"
+    },
+    {
+      "id": 40,
+      "name": "french_fries",
+      "display": "French fries",
+      "group": "Side Dish"
+    },
+    {
+      "id": 41,
+      "name": "french_onion_soup",
+      "display": "French onion soup",
+      "group": "Soup"
+    },
+    {
+      "id": 42,
+      "name": "french_toast",
+      "display": "French toast",
+      "group": "Breakfast"
+    },
+    {
+      "id": 43,
+      "name": "fried_calamari",
+      "display": "Fried calamari",
+      "group": "Seafood"
+    },
+    {
+      "id": 44,
+      "name": "fried_rice",
+      "display": "Fried rice",
+      "group": "Rice Dish"
+    },
+    {
+      "id": 45,
+      "name": "frozen_yogurt",
+      "display": "Frozen yogurt",
+      "group": "Dessert"
+    },
+    {
+      "id": 46,
+      "name": "garlic_bread",
+      "display": "Garlic bread",
+      "group": "Side Dish"
+    },
+    {
+      "id": 47,
+      "name": "gnocchi",
+      "display": "Gnocchi",
+      "group": "Pasta"
+    },
+    {
+      "id": 48,
+      "name": "greek_salad",
+      "display": "Greek salad",
+      "group": "Salad"
+    },
+    {
+      "id": 49,
+      "name": "grilled_cheese_sandwich",
+      "display": "Grilled cheese sandwich",
+      "group": "Sandwich"
+    },
+    {
+      "id": 50,
+      "name": "grilled_salmon",
+      "display": "Grilled salmon",
+      "group": "Seafood"
+    },
+    {
+      "id": 51,
+      "name": "guacamole",
+      "display": "Guacamole",
+      "group": "Appetizer"
+    },
+    {
+      "id": 52,
+      "name": "gyoza",
+      "display": "Gyoza",
+      "group": "Appetizer"
+    },
+    {
+      "id": 53,
+      "name": "hamburger",
+      "display": "Hamburger",
+      "group": "Burger"
+    },
+    {
+      "id": 54,
+      "name": "hot_and_sour_soup",
+      "display": "Hot and sour soup",
+      "group": "Soup"
+    },
+    {
+      "id": 55,
+      "name": "hot_dog",
+      "display": "Hot dog",
+      "group": "Sandwich"
+    },
+    {
+      "id": 56,
+      "name": "huevos_rancheros",
+      "display": "Huevos rancheros",
+      "group": "Breakfast"
+    },
+    {
+      "id": 57,
+      "name": "hummus",
+      "display": "Hummus",
+      "group": "Appetizer"
+    },
+    {
+      "id": 58,
+      "name": "ice_cream",
+      "display": "Ice cream",
+      "group": "Dessert"
+    },
+    {
+      "id": 59,
+      "name": "lasagna",
+      "display": "Lasagna",
+      "group": "Pasta"
+    },
+    {
+      "id": 60,
+      "name": "lobster_bisque",
+      "display": "Lobster bisque",
+      "group": "Soup"
+    },
+    {
+      "id": 61,
+      "name": "lobster_roll_sandwich",
+      "display": "Lobster roll",
+      "group": "Sandwich"
+    },
+    {
+      "id": 62,
+      "name": "macaroni_and_cheese",
+      "display": "Macaroni and cheese",
+      "group": "Pasta"
+    },
+    {
+      "id": 63,
+      "name": "macarons",
+      "display": "Macarons",
+      "group": "Dessert"
+    },
+    {
+      "id": 64,
+      "name": "miso_soup",
+      "display": "Miso soup",
+      "group": "Soup"
+    },
+    {
+      "id": 65,
+      "name": "mussels",
+      "display": "Mussels",
+      "group": "Seafood"
+    },
+    {
+      "id": 66,
+      "name": "nachos",
+      "display": "Nachos",
+      "group": "Tex-Mex"
+    },
+    {
+      "id": 67,
+      "name": "omelette",
+      "display": "Omelette",
+      "group": "Breakfast"
+    },
+    {
+      "id": 68,
+      "name": "onion_rings",
+      "display": "Onion rings",
+      "group": "Side Dish"
+    },
+    {
+      "id": 69,
+      "name": "oysters",
+      "display": "Oysters",
+      "group": "Seafood"
+    },
+    {
+      "id": 70,
+      "name": "pad_thai",
+      "display": "Pad thai",
+      "group": "Noodle Dish"
+    },
+    {
+      "id": 71,
+      "name": "paella",
+      "display": "Paella",
+      "group": "Rice Dish"
+    },
+    {
+      "id": 72,
+      "name": "pancakes",
+      "display": "Pancakes",
+      "group": "Breakfast"
+    },
+    {
+      "id": 73,
+      "name": "panna_cotta",
+      "display": "Panna cotta",
+      "group": "Dessert"
+    },
+    {
+      "id": 74,
+      "name": "peking_duck",
+      "display": "Peking duck",
+      "group": "Meat"
+    },
+    {
+      "id": 75,
+      "name": "pho",
+      "display": "Pho",
+      "group": "Soup"
+    },
+    {
+      "id": 76,
+      "name": "pizza",
+      "display": "Pizza",
+      "group": "Pizza"
+    },
+    {
+      "id": 77,
+      "name": "pork_chop",
+      "display": "Pork chop",
+      "group": "Meat"
+    },
+    {
+      "id": 78,
+      "name": "poutine",
+      "display": "Poutine",
+      "group": "Side Dish"
+    },
+    {
+      "id": 79,
+      "name": "prime_rib",
+      "display": "Prime rib",
+      "group": "Meat"
+    },
+    {
+      "id": 80,
+      "name": "pulled_pork_sandwich",
+      "display": "Pulled pork sandwich",
+      "group": "Sandwich"
+    },
+    {
+      "id": 81,
+      "name": "ramen",
+      "display": "Ramen",
+      "group": "Noodle Dish"
+    },
+    {
+      "id": 82,
+      "name": "ravioli",
+      "display": "Ravioli",
+      "group": "Pasta"
+    },
+    {
+      "id": 83,
+      "name": "red_velvet_cake",
+      "display": "Red velvet cake",
+      "group": "Dessert"
+    },
+    {
+      "id": 84,
+      "name": "risotto",
+      "display": "Risotto",
+      "group": "Rice Dish"
+    },
+    {
+      "id": 85,
+      "name": "samosa",
+      "display": "Samosa",
+      "group": "Appetizer"
+    },
+    {
+      "id": 86,
+      "name": "sashimi",
+      "display": "Sashimi",
+      "group": "Seafood"
+    },
+    {
+      "id": 87,
+      "name": "scallops",
+      "display": "Scallops",
+      "group": "Seafood"
+    },
+    {
+      "id": 88,
+      "name": "seaweed_salad",
+      "display": "Seaweed salad",
+      "group": "Salad"
+    },
+    {
+      "id": 89,
+      "name": "shrimp_and_grits",
+      "display": "Shrimp and grits",
+      "group": "Seafood"
+    },
+    {
+      "id": 90,
+      "name": "spaghetti_bolognese",
+      "display": "Spaghetti bolognese",
+      "group": "Pasta"
+    },
+    {
+      "id": 91,
+      "name": "spaghetti_carbonara",
+      "display": "Spaghetti carbonara",
+      "group": "Pasta"
+    },
+    {
+      "id": 92,
+      "name": "spring_rolls",
+      "display": "Spring rolls",
+      "group": "Appetizer"
+    },
+    {
+      "id": 93,
+      "name": "steak",
+      "display": "Steak",
+      "group": "Meat"
+    },
+    {
+      "id": 94,
+      "name": "strawberry_shortcake",
+      "display": "Strawberry shortcake",
+      "group": "Dessert"
+    },
+    {
+      "id": 95,
+      "name": "sushi",
+      "display": "Sushi",
+      "group": "Seafood"
+    },
+    {
+      "id": 96,
+      "name": "tacos",
+      "display": "Tacos",
+      "group": "Tex-Mex"
+    },
+    {
+      "id": 97,
+      "name": "takoyaki",
+      "display": "Takoyaki",
+      "group": "Appetizer"
+    },
+    {
+      "id": 98,
+      "name": "tiramisu",
+      "display": "Tiramisu",
+      "group": "Dessert"
+    },
+    {
+      "id": 99,
+      "name": "tuna_tartare",
+      "display": "Tuna tartare",
+      "group": "Seafood"
+    },
+    {
+      "id": 100,
+      "name": "waffles",
+      "display": "Waffles",
+      "group": "Breakfast"
+    }
+  ]
+}
