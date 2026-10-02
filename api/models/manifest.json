@@ -7,8 +7,8 @@
       "food101_EfficientNetV2B3_final.h5": null
     },
     "serving": {
-      "siglip2_vision.onnx": null,
-      "siglip2_dishes.npz": null
+      "siglip2_vision.onnx": "23ae10b5b4e0c2282a21b864a15e879131733ed9d294ca34d14892b10eac5eb2",
+      "siglip2_dishes.npz": "c8cf11f8e9767bdfaba18e7579a54206105b3ee26d40a43a1b7dd995c8e6c6fd"
     },
     "optional": {
       "best.onnx": null,

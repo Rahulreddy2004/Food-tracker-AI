@@ -19,8 +19,10 @@ COPY pyproject.toml uv.lock README.md ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-install-project
 COPY app ./app
+# Always rebuild the app itself: uv would otherwise reuse a cached build of it from the cache mount
+# (it only checks pyproject.toml for changes) and ship stale code.
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev --no-editable
+    uv sync --locked --no-dev --no-editable --reinstall-package food-tracker-api
 
 FROM base AS runtime
 RUN useradd --create-home --uid 10001 api

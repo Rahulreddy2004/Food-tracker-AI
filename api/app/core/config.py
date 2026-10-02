@@ -45,7 +45,9 @@ class Settings(BaseSettings):
     min_box_area_frac: float = Field(default=0.01, ge=0, le=1)
     dedupe_iou: float = Field(default=0.6, ge=0, le=1)
     crop_pad_frac: float = Field(default=0.0, ge=0, le=0.5)
-    confirm_below: float = Field(default=0.40, ge=0, le=1)
+    # Ask the user to confirm guesses below this confidence. For SigLIP 2 over 200 dishes, 0.5 flags
+    # ~1 in 10 scans (mostly wrong guesses) and leaves answers that are 90-95% right (MODEL_CARD.md).
+    confirm_below: float = Field(default=0.50, ge=0, le=1)
     top_k: int = Field(default=3, ge=1, le=10)
 
     # --- Data -----------------------------------------------------------------

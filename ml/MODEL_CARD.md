@@ -35,8 +35,24 @@ Top-1 is the share of photos where the app's first guess was right. Results are 
 - **The larger model.** SigLIP 2 so400m scored about 4 points higher on a small sample. It needs
   about 19 s per scan on the API's CPUs, so it is not served.
 
-Rerun the comparison any time from Actions → Compare models. It includes the `served` candidate,
-which is the exact ONNX files and preprocessing the API uses.
+**As served.** The exact ONNX files and preprocessing the API uses score the same as PyTorch on
+these photos: 90.5% top-1 and 98.3% top-5 on Food-101, and 84.3% on Indian-20. This is the
+`served` candidate, measured by the Models workflow.
+
+### When the app asks you to confirm
+
+The table shows the share of photos answered with at least this confidence, and how many of those
+answers were right. These are the served model's figures.
+
+| | ≥ 0.3 | ≥ 0.5 | ≥ 0.7 |
+|---|---|---|---|
+| Food-101 | 98% · 92.2% | 92% · 95.4% | 83% · 98.0% |
+| Indian-20 | 97% · 86.3% | 90% · 90.0% | 79% · 94.8% |
+
+`CONFIRM_BELOW` is 0.5. That flags about 1 in 10 scans, and only about a third of those flagged
+guesses are right, so asking is worthwhile. The answers it doesn't flag are 90–95% right.
+
+Rerun the comparison any time from Actions → Compare models.
 
 ## 2. Food detector: your YOLOv8 (`best.pt` → `best.onnx`, optional)
 
