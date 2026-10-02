@@ -9,6 +9,7 @@ import { Segmented } from "@/components/ui/controls";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/misc";
 import { ResponsiveSheet } from "@/components/ui/overlays";
+import dishes from "@/data/dishes.json";
 import { errorMessage } from "@/lib/api/client";
 import { useCreateMeal, useFoodSearch, usePantry } from "@/lib/api/queries";
 import type { FoodHit, Meal, MealItemIn, MealType } from "@/lib/api/types";
@@ -139,7 +140,7 @@ export function AddFoodSheet({
       description={
         picked
           ? "Set the portion, then add it."
-          : "Search 101 dishes, your pantry and a nutrition database."
+          : `Search ${dishes.length} dishes, your pantry and a nutrition database.`
       }
     >
       {!picked ? (

@@ -116,13 +116,15 @@ function Hero() {
           </Button>
         </div>
         <ul className="mt-9 grid gap-2.5 text-sm text-ink-muted sm:grid-cols-3">
-          {["101 dishes recognised", "Portions you can adjust", "Your data, deletable anytime"].map(
-            (t) => (
-              <li key={t} className="flex items-center gap-2">
-                <CircleCheck className="size-4 shrink-0 text-secondary" /> {t}
-              </li>
-            ),
-          )}
+          {[
+            `${dishes.length} dishes recognised`,
+            "Portions you can adjust",
+            "Your data, deletable anytime",
+          ].map((t) => (
+            <li key={t} className="flex items-center gap-2">
+              <CircleCheck className="size-4 shrink-0 text-secondary" /> {t}
+            </li>
+          ))}
         </ul>
       </div>
       <Suspense fallback={<DemoPlaceholder />}>
@@ -254,9 +256,13 @@ function Accuracy() {
           <div className="mt-6 grid gap-5 leading-relaxed text-bg/80">
             <p>
               Two models work together. A <strong className="text-bg">YOLOv8 detector</strong> finds
-              each food on the plate, and an{" "}
-              <strong className="text-bg">EfficientNetV2-B3 classifier</strong>, trained on the
-              101,000-photo Food-101 dataset, names it.
+              each food on the plate, and <strong className="text-bg">SigLIP 2</strong>, an open
+              image–text model from Google, names it by comparing the photo with descriptions of{" "}
+              {dishes.length} dishes, from pizza to palak paneer.
+            </p>
+            <p>
+              On test photos it had never seen, its first guess was right for 90.5% of 2,020
+              Food-101 photos and 84.3% of 941 photos of Indian dishes.
             </p>
             <p>
               It shows its top three guesses, and when it isn't confident it says so and asks you —

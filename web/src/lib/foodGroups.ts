@@ -1,4 +1,5 @@
 import {
+  Apple,
   Beef,
   CakeSlice,
   Coffee,
@@ -42,6 +43,9 @@ const GROUPS: Record<string, GroupStyle> = {
   "Tex-Mex": { icon: Utensils, tint: "primary" },
   "My pantry": { icon: Package, tint: "secondary" },
   Drinks: { icon: Coffee, tint: "accent" },
+  Drink: { icon: Coffee, tint: "accent" },
+  Bread: { icon: Croissant, tint: "accent" },
+  Fruit: { icon: Apple, tint: "secondary" },
 };
 
 export function groupStyle(group: string | null | undefined): GroupStyle {

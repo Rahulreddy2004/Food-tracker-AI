@@ -6,7 +6,7 @@ import { useReducedMotion } from "@/lib/useMediaQuery";
 
 /**
  * An illustration of a scan on the sample photo (not a live model call). The bowl shows the
- * real behaviour for a dish outside the 101 classes: the app asks and the user confirms.
+ * confirm step: the user checked the top guess before logging it.
  */
 const ITEMS = [
   {
