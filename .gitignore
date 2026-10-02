@@ -58,3 +58,6 @@ emulator-data/
 .vscode/*
 !.vscode/extensions.json
 *.swp
+
+# scripts/deploy-hosting.sh writes this while deploying
+firebase.deploy.json

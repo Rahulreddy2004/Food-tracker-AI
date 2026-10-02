@@ -57,7 +57,7 @@ Details: [`ml/MODEL_CARD.md`](ml/MODEL_CARD.md) and [`docs/adr/`](docs/adr).
 | `web/` | Vite + React 19 + TypeScript app: `src/{app,features,components,lib,styles}`, Vitest and Playwright tests |
 | `ml/` | SigLIP 2 export, your models' conversion and parity checks, the model comparison, model card |
 | `infra/` | Firestore and Storage rules, Cloud Run service, one-time `bootstrap.sh` |
-| `scripts/` | Local stack, model download, smoke test, nutrition table, v1 → v2 migration |
+| `scripts/` | Local stack, model download, smoke test, free-plan API and Hosting deploy, nutrition table, v1 → v2 migration |
 | `.github/workflows/` | `ci.yml` (every push), `models.yml` (manual), `deploy.yml` (main) |
 
 ## Run it locally (no cloud accounts needed)
@@ -137,10 +137,56 @@ Honest limits are in the [model card](ml/MODEL_CARD.md). Look-alike dishes get c
 dish outside the 200 gets the closest name (with low confidence), and a single photo can't measure
 depth. Every number is an estimate the user can edit.
 
+## Free setup (Spark plan): the API runs on your computer
+
+Cloud Run and Cloud Storage need the Blaze plan. On the free Spark plan the app still works:
+- Firebase Hosting serves the website. Firebase Auth and Firestore hold accounts and data.
+- The API and the models run on your own computer, reachable over HTTPS through
+  [Tailscale Funnel](https://tailscale.com/kb/1223/funnel) (free).
+- Meal photos are off, because Storage needs Blaze. Meals are saved without them.
+- The app works while your computer, the API and the tunnel are running.
+
+One-time setup:
+1. In the Firebase console, enable **Email/Password** and **Google** sign-in.
+2. Create a service-account key: Project settings → Service accounts → **Generate new private
+   key**. Move the file to `~/.secrets/food-tracker-sa.json` and run `chmod 600` on it. The key
+   gives full access to the project, so never commit or share it.
+3. Install [Tailscale](https://tailscale.com/download) and sign in. On Windows with WSL, install
+   it on Windows; Windows forwards `localhost` to WSL. Then run `tailscale funnel --bg 8000`.
+   - The first time, it prints a link to turn Funnel on.
+   - It prints your public address, for example `https://my-pc.tail1234.ts.net`.
+4. Sign in to Firebase and install the browser used to prerender the landing page:
+   ```bash
+   npx firebase-tools@15 login --no-localhost
+   (cd web && pnpm exec playwright install --with-deps chromium)
+   ```
+
+Run the API whenever you want the app online:
+```bash
+GOOGLE_APPLICATION_CREDENTIALS=~/.secrets/food-tracker-sa.json scripts/serve-public.sh
+```
+
+Deploy the website the first time, and again after changes:
+```bash
+scripts/deploy-hosting.sh https://my-pc.tail1234.ts.net
+```
+It builds the website for that API address and allows only that address in the CSP. It then
+deploys Hosting and the Firestore rules and indexes, and checks the live site.
+
+To move v1 data, run the migration with the same key. Preview first, then add `--apply`:
+```bash
+cd api && GOOGLE_APPLICATION_CREDENTIALS=~/.secrets/food-tracker-sa.json \
+  FIREBASE_PROJECT_ID=food-tracker-8baa9 uv run python -m app.tools.migrate_v1 --timezone Asia/Kolkata
+```
+
+To move to Blaze later, follow the next section. Nothing here needs undoing; stop the tunnel with
+`tailscale funnel reset`.
+
 ## Deploying (Cloud Run + Firebase Hosting)
 
-Deploys run from GitHub Actions with **Workload Identity Federation**, so no service-account key
-exists anywhere. One-time setup:
+This needs the Blaze plan; on the free Spark plan, see the previous section. Deploys run from
+GitHub Actions with **Workload Identity Federation**, so no service-account key exists anywhere.
+One-time setup:
 
 1. **Rotate the old keys.** The v1 Gemini and CalorieNinjas keys are in this repo's public git
    history. Revoke them and create new ones.
