@@ -1,0 +1,135 @@
+name: Deploy
+
+# API → Cloud Run, web → Firebase Hosting, then a smoke test against production.
+# Signs in to Google Cloud with Workload Identity Federation (no stored key). One-time setup:
+# infra/bootstrap.sh, then the repository variables it prints. Until they exist this is skipped.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "docs/**", "ml/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+defaults:
+  run:
+    shell: bash # -eo pipefail: a failing command in a pipe fails the step
+
+env:
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  REGION: ${{ vars.GCP_REGION || 'asia-south1' }}
+  SERVICE: food-tracker-api
+
+jobs:
+  api:
+    name: API → Cloud Run
+    if: vars.GCP_WORKLOAD_IDENTITY_PROVIDER != ''
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Fetch the ONNX models from the release (checksums verified)
+        run: python3 scripts/fetch_models.py --strict
+
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v3
+
+      - name: Build and push the image
+        id: image
+        run: |
+          image="${REGION}-docker.pkg.dev/${PROJECT_ID}/food-tracker/api:${GITHUB_SHA}"
+          gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+          docker build -t "$image" \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --label "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            api
+          docker push "$image"
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        env:
+          IMAGE: ${{ steps.image.outputs.image }}
+          WEB_ORIGINS: https://${{ vars.GCP_PROJECT_ID }}.web.app,https://${{ vars.GCP_PROJECT_ID }}.firebaseapp.com
+        run: |
+          # shellcheck disable=SC2016  # envsubst takes the variable names literally
+          envsubst '$IMAGE $PROJECT_ID $REGION $WEB_ORIGINS' < infra/cloudrun/service.yaml > service.yaml
+          gcloud run services replace service.yaml --region "$REGION" --quiet
+          # Public endpoint: the API checks Firebase ID tokens itself.
+          gcloud run services add-iam-policy-binding "$SERVICE" --region "$REGION" \
+            --member allUsers --role roles/run.invoker --quiet >/dev/null
+          url="$(gcloud run services describe "$SERVICE" --region "$REGION" --format 'value(status.url)')"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "### API: $url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Smoke test the API
+        run: SMOKE_ORIGIN="https://${PROJECT_ID}.web.app" scripts/smoke.sh "${{ steps.deploy.outputs.url }}"
+
+  web:
+    name: Web → Firebase Hosting
+    needs: api
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: web/package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: web
+      - run: pnpm exec playwright install --with-deps chromium # used to prerender the landing page
+        working-directory: web
+
+      - name: Allow only this API in the CSP
+        env:
+          API_URL: ${{ needs.api.outputs.url }}
+        run: |
+          jq --arg api "$API_URL" '
+            (.hosting.headers[].headers[] | select(.key == "Content-Security-Policy") | .value)
+              |= sub("https://\\*\\.a\\.run\\.app"; $api)
+          ' firebase.json > firebase.deploy.json
+          mv firebase.deploy.json firebase.json
+          grep -q "$API_URL" firebase.json
+
+      - name: Build
+        working-directory: web
+        env:
+          VITE_API_URL: ${{ needs.api.outputs.url }}
+        run: pnpm build && pnpm size
+
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Deploy Hosting, Firestore rules/indexes and Storage rules
+        run: >
+          npx --yes firebase-tools@15 deploy --project "$PROJECT_ID" --non-interactive
+          --only hosting,firestore:rules,firestore:indexes,storage
+          --message "${GITHUB_SHA::7}"
+
+      - name: Check the live site
+        run: |
+          site="https://${PROJECT_ID}.web.app"
+          curl -fsS "$site/" | grep -q "Snap your plate"
+          curl -fsSI "$site/app" | grep -qi '^content-security-policy:.*'"${{ needs.api.outputs.url }}"
+          curl -fsS "$site/__/firebase/init.json" | jq -e .apiKey >/dev/null
+          echo "### Web: $site" >> "$GITHUB_STEP_SUMMARY"

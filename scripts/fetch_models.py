@@ -8,7 +8,7 @@
 Checksums come from api/models/manifest.json (committed, so a changed release file is caught).
 For files without a recorded checksum, the release's SHA256SUMS file (written by the models
 workflow) is used instead; with neither, the file is downloaded and its sha256 printed so it can
-be added to the manifest. --strict refuses files that have no committed checksum.
+be added to the manifest. --strict refuses any file it cannot verify (use it for deploys).
 """
 
 from __future__ import annotations
@@ -77,14 +77,11 @@ def main() -> int:
         "--originals", action="store_true", help="fetch best.pt and the .h5 instead"
     )
     parser.add_argument("--force", action="store_true", help="re-download even if present")
-    parser.add_argument("--strict", action="store_true", help="require checksums in manifest.json")
+    parser.add_argument("--strict", action="store_true", help="fail on files with no checksum")
     args = parser.parse_args()
 
     group = "originals" if args.originals else "serving"
     files: dict[str, str | None] = manifest["files"][group]
-    if args.strict and (missing := [n for n, h in files.items() if not h]):
-        print(f"✗ no checksum in manifest.json for: {', '.join(missing)}", file=sys.stderr)
-        return 1
     fallback = release_sums(args.repo, args.tag) if not all(files.values()) else {}
     MODELS.mkdir(parents=True, exist_ok=True)
     failed = False
@@ -105,7 +102,11 @@ def main() -> int:
             failed = True
             continue
         actual = sha256(dest)
-        if expected is None:
+        if expected is None and args.strict:
+            print(f"✗ {name}: no checksum to verify against (sha256={actual})", file=sys.stderr)
+            dest.unlink()
+            failed = True
+        elif expected is None:
             print(f"! {name}: no checksum recorded yet. sha256={actual}  (add it to manifest.json)")
         elif actual != expected:
             print(

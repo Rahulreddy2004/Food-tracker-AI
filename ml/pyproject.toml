@@ -18,6 +18,8 @@ dependencies = [
     "pillow-heif>=0.20",
     "datasets>=3.0",
     "tqdm>=4.66",
+    # The scripts reuse the API's own pre/post-processing (api/app), which reads its settings.
+    "pydantic-settings>=2.6",
 ]
 
 [tool.uv]

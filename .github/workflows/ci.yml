@@ -67,6 +67,29 @@ jobs:
           firebase emulators:exec --project demo-foodtracker --only auth,firestore
           "cd api && FIREBASE_PROJECT_ID=demo-foodtracker uv run pytest -m emulator -q"
 
+  api-image:
+    name: API — container image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build the production image
+        # The real ONNX files live on a release; empty stand-ins are enough to check the build.
+        run: |
+          touch api/models/best.onnx api/models/classifier.onnx
+          docker build -t food-tracker-api:ci api
+          docker image ls food-tracker-api:ci --format 'image size: {{.Size}}'
+      - name: Start it and check it serves
+        run: |
+          docker run -d --name api -p 8080:8080 \
+            -e ENV=development -e MODEL_BACKEND=fake -e DATA_BACKEND=memory -e LLM_BACKEND=fake \
+            food-tracker-api:ci
+          for _ in $(seq 1 30); do curl -sf localhost:8080/v1/health/ready && break; sleep 1; done
+          curl -sf localhost:8080/v1/health/ready
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/v1/meals)" = 401
+          test "$(docker inspect -f '{{.Config.User}}' food-tracker-api:ci)" = api
+      - if: failure()
+        run: docker logs api
+
   web:
     name: Web — lint, types, tests, build
     runs-on: ubuntu-latest

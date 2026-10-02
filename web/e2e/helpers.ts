@@ -71,9 +71,33 @@ export async function signIn(page: Page, user: TestUser, expectPath = "/app"): P
   await page.waitForURL(`**${expectPath}`);
 }
 
+/**
+ * Wait for entrance animations to finish, so contrast is measured on the final colours rather than
+ * mid-fade (slow CI runners catch fades that a fast machine never shows). Looping animations such
+ * as skeleton shimmer are ignored.
+ */
+async function settleAnimations(page: Page): Promise<void> {
+  await page.waitForFunction(
+    () => {
+      const running = document
+        .getAnimations()
+        .some((a) => a.playState === "running" && a.effect?.getTiming().iterations !== Infinity);
+      if (running) return false;
+      // JS-driven tweens (motion) write inline opacity while they run.
+      return [...document.querySelectorAll<HTMLElement>("[style*='opacity']")].every((el) => {
+        const opacity = Number(getComputedStyle(el).opacity);
+        return opacity === 0 || opacity === 1;
+      });
+    },
+    undefined,
+    { timeout: 5_000 },
+  );
+}
+
 /** Fail on serious or critical WCAG 2.2 AA violations. */
 export async function expectAccessible(page: Page, label: string): Promise<void> {
   await page.waitForLoadState("networkidle");
+  await settleAnimations(page);
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
     .analyze();
