@@ -99,6 +99,15 @@ class OnnxYoloDetector:
         return detections
 
 
+class NoDetector:
+    """Used until a detector is installed: every photo is classified as one dish."""
+
+    name = "none"
+
+    def detect(self, image: RGBImage) -> list[Detection]:
+        return []
+
+
 class FakeDetector:
     """Deterministic detector for tests, demos and E2E runs (no model files needed)."""
 

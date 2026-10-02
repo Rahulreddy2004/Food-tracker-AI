@@ -63,7 +63,7 @@ export function toMealItem(hit: FoodHit, grams: number): MealItemIn {
     name: hit.name,
     display: hit.display,
     group: hit.group ?? null,
-    label: hit.source === "food101" ? hit.name : null,
+    label: hit.source === "dish" ? hit.name : null,
     grams,
     per100g: hit.per100g,
   };

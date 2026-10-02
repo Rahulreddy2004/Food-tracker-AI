@@ -405,8 +405,7 @@ export default function SettingsPage() {
       </Section>
 
       <p className="pb-4 text-center text-xs text-ink-subtle">
-        Food Tracker v2 · YOLOv8 + EfficientNetV2-B3 (Food-101) · nutrition estimates aren't medical
-        advice
+        Food Tracker v2 · YOLOv8 + SigLIP 2 · nutrition estimates aren't medical advice
       </p>
     </div>
   );

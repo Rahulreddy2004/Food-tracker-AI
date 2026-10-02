@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import io
+import json
 
 import numpy as np
 import pytest
 from PIL import Image
 
-from app.core.config import DATA_DIR
+from app.core.config import API_DIR, DATA_DIR
 from app.core.errors import ApiError
 from app.ml.boxes import iou, nms, overlap_of_smaller
 from app.ml.classifier import FakeClassifier, as_probabilities
@@ -18,6 +19,7 @@ from app.ml.labels import LabelSet
 from app.ml.pipeline import PipelineConfig, ScanPipeline
 from app.ml.portion import PortionEstimator, round_grams
 from app.ml.structs import Box, Detection, RGBImage
+from app.services.nutrition import NutritionTable
 from tests.conftest import make_jpeg
 
 LABELS = LabelSet.load(DATA_DIR / "labels.json")
@@ -26,11 +28,33 @@ LABELS = LabelSet.load(DATA_DIR / "labels.json")
 # --- labels -------------------------------------------------------------------------------------
 
 
-def test_labels_cover_food101_in_model_order() -> None:
-    assert len(LABELS) == 101
+def test_labels_keep_food101_in_model_order_then_extra_dishes() -> None:
+    # Ids 0..100 are the EfficientNet's outputs; the open-vocabulary classifier knows all of them.
+    assert len(LABELS) == 200
     assert LABELS[0].name == "apple_pie"
     assert LABELS[100].name == "waffles"
-    assert all(c.group for c in LABELS.classes), "every class needs a food group"
+    assert LABELS[101].name == "palak_paneer"
+    assert len({c.name for c in LABELS.classes}) == len(LABELS), "names must be unique"
+    assert all(c.group and c.display for c in LABELS.classes), "every dish needs a group and name"
+
+
+def test_every_dish_has_nutrition_and_a_serving() -> None:
+    table = NutritionTable.load(DATA_DIR / "nutrition.json")
+    missing = [c.name for c in LABELS.classes if table.get(c.name) is None]
+    assert not missing, f"no nutrition for {missing}"
+    for c in LABELS.classes:
+        entry = table.get(c.name)
+        assert entry is not None and entry.serving_g > 0
+        m = entry.per100g
+        atwater = 4 * m.protein_g + 4 * m.carbs_g + 9 * m.fat_g
+        assert abs(atwater - m.kcal) / m.kcal < 0.3, f"{c.name}: {m.kcal} kcal vs macros {atwater}"
+
+
+def test_ml_vocabulary_matches_labels() -> None:
+    """ml/vocab/extra_dishes.json holds the prompts for the dishes beyond Food-101."""
+    vocab = json.loads((API_DIR.parent / "ml" / "vocab" / "extra_dishes.json").read_text())
+    extra = [d["name"] for d in vocab["dishes"]]
+    assert extra == [c.name for c in LABELS.classes[101:]], "same dishes, same order"
 
 
 # --- geometry -------------------------------------------------------------------------------------

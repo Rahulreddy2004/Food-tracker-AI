@@ -18,8 +18,8 @@ from app.routers import coach, foods, health, me, meals, pantry, scan
 API_DESCRIPTION = """
 Food Tracker AI: photo → foods → nutrition.
 
-* **Scan:** YOLOv8 finds the foods; EfficientNetV2-B3 (Food-101) names them; portions are estimated
-  from box size.
+* **Scan:** YOLOv8 finds the foods (when installed); SigLIP 2 names each one among 200 dishes;
+  portions are estimated from box size.
 * **Diary:** meals, daily summaries, pantry foods, goals.
 * **Coach:** an AI nutrition coach grounded in your own data (streamed replies).
 

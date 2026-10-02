@@ -15,7 +15,7 @@ class MealItemIn(ApiModel):
     name: str = Field(min_length=1, max_length=120)
     display: str = Field(min_length=1, max_length=120)
     group: str | None = Field(default=None, max_length=60)
-    label: str | None = Field(default=None, max_length=80, description="Food-101 class if known")
+    label: str | None = Field(default=None, max_length=80, description="Dish name if known")
     confidence: float | None = Field(default=None, ge=0, le=1)
     grams: float = Field(gt=0, le=5000)
     estimated_grams: float | None = Field(default=None, gt=0, le=5000)

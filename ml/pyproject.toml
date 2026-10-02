@@ -5,11 +5,14 @@ description = "Convert, check and evaluate the Food Tracker models (YOLOv8 detec
 requires-python = ">=3.12,<3.13"
 dependencies = [
     # The classifier was trained/saved with TensorFlow 2.19 (Keras 3); keep that runtime to load it.
-    "tensorflow-cpu==2.19.*",
+    # tensorflow-cpu has Linux wheels only (its Windows build was never published for 2.19).
+    "tensorflow-cpu==2.19.*; sys_platform == 'linux'",
+    "tensorflow==2.19.*; sys_platform == 'darwin'",
     "tf2onnx>=1.17",
     "onnx>=1.17",
     "onnxruntime>=1.20",
     "onnxslim>=0.1.90",
+    "onnxscript>=0.3",  # torch.onnx.export(dynamo=True), used by export_siglip.py
     "ultralytics>=8.3.50",
     "torch>=2.6",
     "torchvision>=0.21",
@@ -20,10 +23,15 @@ dependencies = [
     "tqdm>=4.66",
     # The scripts reuse the API's own pre/post-processing (api/app), which reads its settings.
     "pydantic-settings>=2.6",
+    # compare.py: open models from Hugging Face (SigLIP 2, CLIP, Food-101 fine-tunes).
+    "transformers>=4.50,<5",
+    "sentencepiece>=0.2",
 ]
 
 [tool.uv]
 package = false
+# Resolve for the platforms the tools run on (CI is Linux); TensorFlow 2.19 cannot resolve for Windows.
+environments = ["sys_platform == 'linux'", "sys_platform == 'darwin'"]
 
 # CPU-only PyTorch (≈200 MB instead of several GB of CUDA libraries).
 [tool.uv.sources]

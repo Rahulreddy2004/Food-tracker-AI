@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Download model files from a GitHub Release into api/models and verify their checksums.
 
-    python scripts/fetch_models.py                    # ONNX files used by the API (default)
+    python scripts/fetch_models.py                    # files the API serves (default)
     python scripts/fetch_models.py --originals        # best.pt + .h5 (for ml/ conversion & parity)
     python scripts/fetch_models.py --tag models-v1 --repo Rahulreddy2004/Food-tracker-AI
 
@@ -9,6 +9,7 @@ Checksums come from api/models/manifest.json (committed, so a changed release fi
 For files without a recorded checksum, the release's SHA256SUMS file (written by the models
 workflow) is used instead; with neither, the file is downloaded and its sha256 printed so it can
 be added to the manifest. --strict refuses any file it cannot verify (use it for deploys).
+Files listed as optional (your detector, your EfficientNet) are skipped if the release lacks them.
 """
 
 from __future__ import annotations
@@ -66,6 +67,38 @@ def release_sums(repo: str, tag: str) -> dict[str, str]:
     return sums
 
 
+def fetch(name: str, expected: str | None, args: argparse.Namespace, *, required: bool) -> bool:
+    """Download and verify one file. Returns False when that should fail the run."""
+    dest = MODELS / name
+    if dest.exists() and not args.force and expected and sha256(dest) == expected:
+        print(f"✓ {name} (already present)")
+        return True
+    url = f"https://github.com/{args.repo}/releases/download/{args.tag}/{name}"
+    print(f"↓ {url}")
+    try:
+        download(url, dest)
+    except OSError as exc:
+        if not required:
+            print(f"– {name}: not on the release (optional): {exc}")
+            return True
+        print(f"✗ {name}: {exc}", file=sys.stderr)
+        return False
+    actual = sha256(dest)
+    if expected is None and args.strict:
+        print(f"✗ {name}: no checksum to verify against (sha256={actual})", file=sys.stderr)
+        dest.unlink()
+        return False
+    if expected is None:
+        print(f"! {name}: no checksum recorded yet. sha256={actual}  (add it to manifest.json)")
+    elif actual != expected:
+        print(f"✗ {name}: checksum mismatch (expected {expected}, got {actual})", file=sys.stderr)
+        dest.unlink()
+        return False
+    else:
+        print(f"✓ {name} verified")
+    return True
+
+
 def main() -> int:
     manifest = json.loads(MANIFEST.read_text())
     parser = argparse.ArgumentParser(
@@ -80,43 +113,23 @@ def main() -> int:
     parser.add_argument("--strict", action="store_true", help="fail on files with no checksum")
     args = parser.parse_args()
 
-    group = "originals" if args.originals else "serving"
-    files: dict[str, str | None] = manifest["files"][group]
-    fallback = release_sums(args.repo, args.tag) if not all(files.values()) else {}
+    groups = manifest["files"]
+    # (name, recorded checksum, required)
+    wanted: list[tuple[str, str | None, bool]] = (
+        [(n, h, True) for n, h in groups["originals"].items()]
+        if args.originals
+        else [(n, h, True) for n, h in groups["serving"].items()]
+        + [(n, h, False) for n, h in groups.get("optional", {}).items()]
+    )
+    fallback = release_sums(args.repo, args.tag) if not all(h for _, h, _ in wanted) else {}
     MODELS.mkdir(parents=True, exist_ok=True)
-    failed = False
-    for name, recorded in files.items():
+    ok = True
+    for name, recorded, required in wanted:
         expected = recorded or fallback.get(name)
         if expected and not recorded:
             print(f"  {name}: using the checksum from the release's SHA256SUMS")
-        dest = MODELS / name
-        if dest.exists() and not args.force and expected and sha256(dest) == expected:
-            print(f"✓ {name} (already present)")
-            continue
-        url = f"https://github.com/{args.repo}/releases/download/{args.tag}/{name}"
-        print(f"↓ {url}")
-        try:
-            download(url, dest)
-        except OSError as exc:
-            print(f"✗ {name}: {exc}", file=sys.stderr)
-            failed = True
-            continue
-        actual = sha256(dest)
-        if expected is None and args.strict:
-            print(f"✗ {name}: no checksum to verify against (sha256={actual})", file=sys.stderr)
-            dest.unlink()
-            failed = True
-        elif expected is None:
-            print(f"! {name}: no checksum recorded yet. sha256={actual}  (add it to manifest.json)")
-        elif actual != expected:
-            print(
-                f"✗ {name}: checksum mismatch (expected {expected}, got {actual})", file=sys.stderr
-            )
-            dest.unlink()
-            failed = True
-        else:
-            print(f"✓ {name} verified")
-    return 1 if failed else 0
+        ok &= fetch(name, expected, args, required=required)
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":

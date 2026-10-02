@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "react-router";
 
 import { Logo } from "@/components/brand";
+import dishes from "@/data/dishes.json";
 
 export function AuthLayout({
   title,
@@ -41,7 +42,7 @@ export function AuthLayout({
               A photo, a quick check, and dinner's logged.
             </p>
             <p className="mt-3 text-sm text-[#fbf7f0]/80">
-              Recognises 101 dishes · estimates portions · you stay in control
+              Recognises {dishes.length} dishes · estimates portions · you stay in control
             </p>
           </div>
         </div>

@@ -1,4 +1,10 @@
-"""Food classifiers. `OnnxClassifier` runs `food101_EfficientNetV2B3_final.h5` exported to ONNX."""
+"""Food classifiers.
+
+`ZeroShotClassifier` (served by default) runs SigLIP 2's image encoder and compares each photo
+with a text embedding per dish, so it can name every dish in labels.json. `OnnxClassifier` runs
+the EfficientNetV2-B3 Food-101 model (`food101_EfficientNetV2B3_final.h5` exported to ONNX),
+which only knows the 101 Food-101 dishes.
+"""
 
 from __future__ import annotations
 
@@ -74,6 +80,67 @@ class OnnxClassifier:
         else:
             raw = self.session.run(None, {self.input_name: batch})[0]
         return as_probabilities(np.asarray(raw, dtype=np.float32))
+
+
+class ZeroShotClassifier:
+    """Open-vocabulary classifier: SigLIP 2 image encoder (ONNX) + precomputed dish embeddings.
+
+    The dish file (written by ml/export_siglip.py) holds, in labels.json order, one normalised text
+    embedding per dish plus the model's logit scale/bias and its image preprocessing. Probabilities
+    are a softmax over every dish.
+    """
+
+    def __init__(self, model: Path, dishes: Path, labels: LabelSet, threads: int = 2) -> None:
+        if not dishes.is_file():
+            raise ModelLoadError(f"Dish embeddings not found: {dishes} (scripts/fetch_models.py)")
+        with np.load(dishes, allow_pickle=False) as data:
+            names = [str(n) for n in data["names"]]
+            embeddings = np.asarray(data["embeddings"], dtype=np.float32)
+            self.scale = float(data["logit_scale"])
+            self.bias = float(data["logit_bias"])
+            self.size = int(data["image_size"])
+            self.mean = np.asarray(data["mean"], dtype=np.float32)
+            self.std = np.asarray(data["std"], dtype=np.float32)
+            self.rescale = float(data["rescale"])
+            self.resample = str(data["resample"])
+        expected = [c.name for c in labels.classes]
+        if names != expected:
+            missing = sorted(set(expected) - set(names))
+            if missing:
+                raise ModelLoadError(
+                    f"{dishes.name} has no embedding for {len(missing)} dishes in labels.json "
+                    f"(e.g. {missing[:3]}); re-run ml/export_siglip.py"
+                )
+            order = {name: i for i, name in enumerate(names)}
+            embeddings = embeddings[[order[name] for name in expected]]
+        norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+        self.text = embeddings / np.maximum(norms, 1e-12)
+
+        self.session = load_session(model, threads)
+        self.input_name = self.session.get_inputs()[0].name
+        out_dim = self.session.get_outputs()[0].shape[-1]
+        if isinstance(out_dim, int) and out_dim != self.text.shape[1]:
+            raise ModelLoadError(
+                f"{model.name} outputs {out_dim}-d embeddings but {dishes.name} has "
+                f"{self.text.shape[1]}-d ones; export both with ml/export_siglip.py"
+            )
+        self.name = f"siglip2-onnx:{model.name}"
+
+    def _prepare(self, crops: list[RGBImage]) -> npt.NDArray[np.float32]:
+        size = (self.size, self.size)
+        pixels = np.stack([resize(c, size, self.resample) for c in crops]).astype(np.float32)
+        normalised = (pixels * np.float32(self.rescale) - self.mean) / self.std
+        return np.ascontiguousarray(normalised.transpose(0, 3, 1, 2), dtype=np.float32)
+
+    def classify(self, crops: list[RGBImage]) -> Probs:
+        if not crops:
+            return np.zeros((0, 0), dtype=np.float32)
+        emb = np.asarray(
+            self.session.run(None, {self.input_name: self._prepare(crops)})[0], dtype=np.float32
+        )
+        emb /= np.maximum(np.linalg.norm(emb, axis=1, keepdims=True), 1e-12)
+        logits = (emb @ self.text.T) * self.scale + self.bias
+        return softmax(logits.astype(np.float32))
 
 
 class FakeClassifier:

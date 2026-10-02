@@ -10,9 +10,9 @@ import structlog
 
 from app.core.config import DATA_DIR, Settings
 from app.core.ratelimit import Bucket, SlidingWindowLimiter
-from app.ml.classifier import FakeClassifier, OnnxClassifier
-from app.ml.detector import FakeDetector, OnnxYoloDetector
-from app.ml.labels import LabelSet
+from app.ml.classifier import Classifier, FakeClassifier, OnnxClassifier, ZeroShotClassifier
+from app.ml.detector import Detector, FakeDetector, NoDetector, OnnxYoloDetector
+from app.ml.labels import FOOD101_CLASSES, LabelSet
 from app.ml.pipeline import PipelineConfig, ScanPipeline
 from app.ml.portion import PortionEstimator
 from app.ml.runtime import ModelLoadError
@@ -56,16 +56,32 @@ def build_pipeline(settings: Settings, labels: LabelSet) -> ScanPipeline:
     )
     if settings.model_backend == "fake":
         return ScanPipeline(FakeDetector(), FakeClassifier(labels), config)
-    detector = OnnxYoloDetector(
-        settings.models_dir / settings.detector_file,
-        confidence=settings.det_confidence,
-        iou=settings.det_iou,
-        max_boxes=settings.det_max_boxes,
-        threads=settings.onnx_threads,
-    )
-    classifier = OnnxClassifier(
-        settings.models_dir / settings.classifier_file, len(labels), threads=settings.onnx_threads
-    )
+    threads = settings.onnx_threads
+    detector_path = settings.models_dir / settings.detector_file
+    detector: Detector
+    if detector_path.is_file():
+        detector = OnnxYoloDetector(
+            detector_path,
+            confidence=settings.det_confidence,
+            iou=settings.det_iou,
+            max_boxes=settings.det_max_boxes,
+            threads=threads,
+        )
+    elif settings.detector_required:
+        raise ModelLoadError(f"Detector not found: {detector_path} (DETECTOR_REQUIRED is set)")
+    else:
+        log.warning("detector_missing", path=str(detector_path), effect="one dish per photo")
+        detector = NoDetector()
+    classifier: Classifier
+    if settings.classifier == "siglip2":
+        classifier = ZeroShotClassifier(
+            settings.classifier_path,
+            settings.models_dir / settings.dish_embeddings_file,
+            labels,
+            threads=threads,
+        )
+    else:
+        classifier = OnnxClassifier(settings.classifier_path, FOOD101_CLASSES, threads=threads)
     return ScanPipeline(detector, classifier, config)
 
 
@@ -92,7 +108,7 @@ def build_repositories(settings: Settings) -> Repositories:
 
 async def build_container(settings: Settings, repos: Repositories | None = None) -> Container:
     labels = LabelSet.load(DATA_DIR / "labels.json")
-    nutrition = NutritionTable.load(DATA_DIR / "nutrition_food101.json")
+    nutrition = NutritionTable.load(DATA_DIR / "nutrition.json")
     portions = PortionEstimator.load(DATA_DIR / "portions.json")
 
     pipeline: ScanPipeline | None = None

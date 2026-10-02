@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "Reference box sizes as a fraction of the image area. A box this size is about one typical serving (servingG in nutrition_food101.json). Converted from the v1 pixel calibration, assumed to be measured on 640x640 images.",
+  "description": "Reference box sizes as a fraction of the image area. A box this size is about one typical serving (servingG in nutrition.json). Converted from the v1 pixel calibration, assumed to be measured on 640x640 images.",
   "clamp": [
     0.3,
     3.0

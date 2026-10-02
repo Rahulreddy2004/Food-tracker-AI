@@ -9,7 +9,7 @@ import numpy as np
 import pillow_heif
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-from app.core.errors import ApiError
+from app.core.problem import ApiError
 from app.ml.structs import Box, RGBImage
 
 pillow_heif.register_heif_opener()
@@ -57,7 +57,13 @@ def crop(image: RGBImage, box: Box) -> RGBImage:
     return image[y1:y2, x1:x2]
 
 
-def resize(image: RGBImage, size: tuple[int, int]) -> RGBImage:
-    """Resize to (width, height) with bilinear filtering (matches tf.image.resize's default)."""
+RESAMPLING = {
+    "bilinear": Image.Resampling.BILINEAR,  # tf.image.resize's default
+    "bicubic": Image.Resampling.BICUBIC,
+}
+
+
+def resize(image: RGBImage, size: tuple[int, int], resample: str = "bilinear") -> RGBImage:
+    """Resize to (width, height). Bilinear matches tf.image.resize and the SigLIP processors."""
     pil = Image.fromarray(image)
-    return np.asarray(pil.resize(size, Image.Resampling.BILINEAR), dtype=np.uint8)
+    return np.asarray(pil.resize(size, RESAMPLING[resample]), dtype=np.uint8)

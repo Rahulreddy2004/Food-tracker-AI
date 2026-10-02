@@ -353,7 +353,7 @@ export interface components {
              * Source
              * @enum {string}
              */
-            source: "food101" | "pantry" | "calorieninjas";
+            source: "dish" | "pantry" | "calorieninjas";
             /**
              * Id
              * @description Pantry food id when source is `pantry`
@@ -361,7 +361,7 @@ export interface components {
             id?: string | null;
             /**
              * Name
-             * @description Stable key, e.g. a Food-101 class name
+             * @description Stable key, e.g. a dish name such as `palak_paneer`
              */
             name: string;
             /** Display */
@@ -504,7 +504,7 @@ export interface components {
             group?: string | null;
             /**
              * Label
-             * @description Food-101 class if known
+             * @description Dish name if known
              */
             label?: string | null;
             /** Confidence */
@@ -527,7 +527,7 @@ export interface components {
             group?: string | null;
             /**
              * Label
-             * @description Food-101 class if known
+             * @description Dish name if known
              */
             label?: string | null;
             /** Confidence */
@@ -650,7 +650,7 @@ export interface components {
         Prediction: {
             /**
              * Label
-             * @description Food-101 class name, e.g. `caesar_salad`
+             * @description Dish name from labels.json, e.g. `palak_paneer`
              */
             label: string;
             /** Display */

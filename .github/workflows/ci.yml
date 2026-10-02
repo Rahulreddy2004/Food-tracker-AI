@@ -73,9 +73,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Build the production image
-        # The real ONNX files live on a release; empty stand-ins are enough to check the build.
+        # Without model files (they live on a release); the boot check below uses fake models.
         run: |
-          touch api/models/best.onnx api/models/classifier.onnx
           docker build -t food-tracker-api:ci api
           docker image ls food-tracker-api:ci --format 'image size: {{.Size}}'
       - name: Start it and check it serves

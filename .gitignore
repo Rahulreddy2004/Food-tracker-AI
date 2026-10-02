@@ -12,9 +12,13 @@ serviceAccountKey.json
 *.pth
 *.onnx
 *.tflite
+!api/tests/fixtures/**/*.onnx
 api/models/*
 !api/models/manifest.json
 !api/models/README.md
+
+# Evaluation output (published as workflow artifacts instead)
+ml/results/
 
 # Python
 __pycache__/

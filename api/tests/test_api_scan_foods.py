@@ -78,7 +78,7 @@ async def test_scan_when_models_missing(client: httpx.AsyncClient, container: Co
     assert (await client.get("/v1/health/ready")).status_code == 503
 
 
-async def test_search_food101_and_pantry(client: httpx.AsyncClient) -> None:
+async def test_search_dishes_and_pantry(client: httpx.AsyncClient) -> None:
     created = await client.post(
         "/v1/pantry",
         json={
@@ -91,9 +91,9 @@ async def test_search_food101_and_pantry(client: httpx.AsyncClient) -> None:
     res = await client.get("/v1/foods/search", params={"q": "pizza"})
     assert res.status_code == 200
     results = res.json()["results"]
-    assert results[0]["source"] in {"food101", "pantry"}
+    assert results[0]["source"] in {"dish", "pantry"}
     sources = {r["source"] for r in results}
-    assert {"food101", "pantry"} <= sources
+    assert {"dish", "pantry"} <= sources
     pantry_hit = next(r for r in results if r["source"] == "pantry")
     assert pantry_hit["per100g"]["kcal"] == 260  # 390 kcal per 150 g
 
@@ -109,7 +109,7 @@ async def test_search_uses_calorieninjas_when_local_hits_are_weak(container: Con
         json={
             "items": [
                 {
-                    "name": "dal makhani",
+                    "name": "chicken shawarma",
                     "calories": 250.0,
                     "serving_size_g": 200.0,
                     "protein_g": 10.0,
@@ -120,12 +120,12 @@ async def test_search_uses_calorieninjas_when_local_hits_are_weak(container: Con
         }
     )
     container.search.calorie.api_key = "test-key"
-    hits = await container.search.search("dal makhani", pantry=[])
+    hits = await container.search.search("chicken shawarma", pantry=[])
     assert route.called
     assert route.calls.last.request.headers["x-api-key"] == "test-key"
-    dal = next(h for h in hits if h.source == "calorieninjas")
-    assert dal.per100g.kcal == 125 and dal.per100g.fat_g == 0  # non-numeric field ignored
-    await container.search.search("dal makhani", pantry=[])
+    hit = next(h for h in hits if h.source == "calorieninjas")
+    assert hit.per100g.kcal == 125 and hit.per100g.fat_g == 0  # non-numeric field ignored
+    await container.search.search("chicken shawarma", pantry=[])
     assert route.call_count == 1, "second search served from cache"
 
 

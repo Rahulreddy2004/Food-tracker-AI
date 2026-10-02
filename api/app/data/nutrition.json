@@ -1,8 +1,8 @@
 {
-  "version": 1,
+  "version": 2,
   "unit": "per 100 g",
   "source": "curated",
-  "note": "Approximate values for a typical restaurant/home preparation, compiled from common nutrition references (USDA FoodData Central style). Refresh with scripts/build_nutrition_table.py.",
+  "note": "Approximate values for a typical restaurant/home preparation, compiled from common nutrition references (USDA FoodData Central and Indian Food Composition Tables style). Calories agree with the 4/4/9 estimate from macros within 15% for every added dish. Refresh with scripts/build_nutrition_table.py.",
   "items": {
     "apple_pie": {
       "kcal": 237,
@@ -710,6 +710,699 @@
       "fatG": 14.1,
       "carbsG": 32.9,
       "servingG": 120
+    },
+    "palak_paneer": {
+      "kcal": 150,
+      "proteinG": 7.0,
+      "fatG": 11.5,
+      "carbsG": 5.5,
+      "servingG": 200
+    },
+    "paneer_butter_masala": {
+      "kcal": 210,
+      "proteinG": 8.0,
+      "fatG": 16.0,
+      "carbsG": 8.0,
+      "servingG": 200
+    },
+    "kadai_paneer": {
+      "kcal": 180,
+      "proteinG": 8.5,
+      "fatG": 13.5,
+      "carbsG": 7.0,
+      "servingG": 200
+    },
+    "shahi_paneer": {
+      "kcal": 220,
+      "proteinG": 8.0,
+      "fatG": 17.5,
+      "carbsG": 8.0,
+      "servingG": 200
+    },
+    "matar_paneer": {
+      "kcal": 160,
+      "proteinG": 7.0,
+      "fatG": 10.5,
+      "carbsG": 9.5,
+      "servingG": 200
+    },
+    "malai_kofta": {
+      "kcal": 220,
+      "proteinG": 5.5,
+      "fatG": 16.5,
+      "carbsG": 13.0,
+      "servingG": 200
+    },
+    "butter_chicken": {
+      "kcal": 170,
+      "proteinG": 13.0,
+      "fatG": 11.0,
+      "carbsG": 5.0,
+      "servingG": 200
+    },
+    "chicken_tikka_masala": {
+      "kcal": 150,
+      "proteinG": 13.0,
+      "fatG": 8.5,
+      "carbsG": 5.5,
+      "servingG": 200
+    },
+    "chicken_korma": {
+      "kcal": 180,
+      "proteinG": 13.0,
+      "fatG": 12.5,
+      "carbsG": 5.0,
+      "servingG": 200
+    },
+    "rogan_josh": {
+      "kcal": 160,
+      "proteinG": 14.0,
+      "fatG": 10.0,
+      "carbsG": 4.0,
+      "servingG": 200
+    },
+    "mutton_curry": {
+      "kcal": 175,
+      "proteinG": 15.0,
+      "fatG": 11.5,
+      "carbsG": 3.5,
+      "servingG": 200
+    },
+    "keema": {
+      "kcal": 210,
+      "proteinG": 16.0,
+      "fatG": 14.0,
+      "carbsG": 5.0,
+      "servingG": 180
+    },
+    "fish_curry": {
+      "kcal": 120,
+      "proteinG": 13.0,
+      "fatG": 6.0,
+      "carbsG": 3.5,
+      "servingG": 200
+    },
+    "prawn_curry": {
+      "kcal": 130,
+      "proteinG": 13.5,
+      "fatG": 7.0,
+      "carbsG": 4.0,
+      "servingG": 200
+    },
+    "egg_curry": {
+      "kcal": 150,
+      "proteinG": 8.5,
+      "fatG": 11.0,
+      "carbsG": 5.0,
+      "servingG": 200
+    },
+    "chana_masala": {
+      "kcal": 150,
+      "proteinG": 7.0,
+      "fatG": 5.5,
+      "carbsG": 19.0,
+      "servingG": 200
+    },
+    "chole_bhature": {
+      "kcal": 290,
+      "proteinG": 7.5,
+      "fatG": 15.0,
+      "carbsG": 32.0,
+      "servingG": 300
+    },
+    "rajma": {
+      "kcal": 130,
+      "proteinG": 6.5,
+      "fatG": 4.0,
+      "carbsG": 17.0,
+      "servingG": 200
+    },
+    "dal_makhani": {
+      "kcal": 145,
+      "proteinG": 6.0,
+      "fatG": 7.5,
+      "carbsG": 14.0,
+      "servingG": 200
+    },
+    "dal_tadka": {
+      "kcal": 110,
+      "proteinG": 6.0,
+      "fatG": 3.5,
+      "carbsG": 14.0,
+      "servingG": 200
+    },
+    "sambar": {
+      "kcal": 75,
+      "proteinG": 3.5,
+      "fatG": 2.5,
+      "carbsG": 10.0,
+      "servingG": 200
+    },
+    "rasam": {
+      "kcal": 40,
+      "proteinG": 1.5,
+      "fatG": 1.5,
+      "carbsG": 5.5,
+      "servingG": 200
+    },
+    "aloo_gobi": {
+      "kcal": 105,
+      "proteinG": 2.5,
+      "fatG": 6.0,
+      "carbsG": 11.0,
+      "servingG": 180
+    },
+    "bhindi_masala": {
+      "kcal": 110,
+      "proteinG": 2.5,
+      "fatG": 7.5,
+      "carbsG": 9.0,
+      "servingG": 150
+    },
+    "baingan_bharta": {
+      "kcal": 100,
+      "proteinG": 2.0,
+      "fatG": 7.0,
+      "carbsG": 8.0,
+      "servingG": 180
+    },
+    "sarson_ka_saag": {
+      "kcal": 95,
+      "proteinG": 3.5,
+      "fatG": 6.0,
+      "carbsG": 7.0,
+      "servingG": 200
+    },
+    "kadhi": {
+      "kcal": 95,
+      "proteinG": 3.5,
+      "fatG": 5.5,
+      "carbsG": 8.0,
+      "servingG": 200
+    },
+    "vindaloo": {
+      "kcal": 160,
+      "proteinG": 14.0,
+      "fatG": 10.0,
+      "carbsG": 4.0,
+      "servingG": 200
+    },
+    "nihari": {
+      "kcal": 180,
+      "proteinG": 15.0,
+      "fatG": 12.0,
+      "carbsG": 3.5,
+      "servingG": 220
+    },
+    "haleem": {
+      "kcal": 160,
+      "proteinG": 11.0,
+      "fatG": 7.0,
+      "carbsG": 13.0,
+      "servingG": 220
+    },
+    "biryani": {
+      "kcal": 180,
+      "proteinG": 7.0,
+      "fatG": 6.5,
+      "carbsG": 23.0,
+      "servingG": 300
+    },
+    "veg_pulao": {
+      "kcal": 150,
+      "proteinG": 3.0,
+      "fatG": 4.5,
+      "carbsG": 24.0,
+      "servingG": 250
+    },
+    "jeera_rice": {
+      "kcal": 160,
+      "proteinG": 2.8,
+      "fatG": 4.0,
+      "carbsG": 28.0,
+      "servingG": 200
+    },
+    "steamed_rice": {
+      "kcal": 130,
+      "proteinG": 2.7,
+      "fatG": 0.3,
+      "carbsG": 28.0,
+      "servingG": 200
+    },
+    "lemon_rice": {
+      "kcal": 170,
+      "proteinG": 3.0,
+      "fatG": 5.5,
+      "carbsG": 27.0,
+      "servingG": 200
+    },
+    "curd_rice": {
+      "kcal": 130,
+      "proteinG": 3.5,
+      "fatG": 4.0,
+      "carbsG": 20.0,
+      "servingG": 250
+    },
+    "khichdi": {
+      "kcal": 120,
+      "proteinG": 4.5,
+      "fatG": 3.0,
+      "carbsG": 19.0,
+      "servingG": 250
+    },
+    "naan": {
+      "kcal": 290,
+      "proteinG": 9.0,
+      "fatG": 7.5,
+      "carbsG": 47.0,
+      "servingG": 90
+    },
+    "chapati": {
+      "kcal": 300,
+      "proteinG": 9.0,
+      "fatG": 7.0,
+      "carbsG": 49.0,
+      "servingG": 80
+    },
+    "paratha": {
+      "kcal": 320,
+      "proteinG": 7.0,
+      "fatG": 13.0,
+      "carbsG": 44.0,
+      "servingG": 80
+    },
+    "aloo_paratha": {
+      "kcal": 260,
+      "proteinG": 5.5,
+      "fatG": 11.0,
+      "carbsG": 35.0,
+      "servingG": 120
+    },
+    "puri": {
+      "kcal": 380,
+      "proteinG": 7.0,
+      "fatG": 20.0,
+      "carbsG": 44.0,
+      "servingG": 60
+    },
+    "kulcha": {
+      "kcal": 300,
+      "proteinG": 8.5,
+      "fatG": 8.0,
+      "carbsG": 48.0,
+      "servingG": 90
+    },
+    "appam": {
+      "kcal": 170,
+      "proteinG": 3.0,
+      "fatG": 2.5,
+      "carbsG": 33.0,
+      "servingG": 120
+    },
+    "masala_dosa": {
+      "kcal": 190,
+      "proteinG": 4.5,
+      "fatG": 8.0,
+      "carbsG": 26.0,
+      "servingG": 200
+    },
+    "idli": {
+      "kcal": 140,
+      "proteinG": 4.5,
+      "fatG": 0.5,
+      "carbsG": 29.0,
+      "servingG": 120
+    },
+    "medu_vada": {
+      "kcal": 280,
+      "proteinG": 9.0,
+      "fatG": 16.0,
+      "carbsG": 25.0,
+      "servingG": 100
+    },
+    "uttapam": {
+      "kcal": 170,
+      "proteinG": 4.5,
+      "fatG": 5.5,
+      "carbsG": 26.0,
+      "servingG": 150
+    },
+    "upma": {
+      "kcal": 140,
+      "proteinG": 3.5,
+      "fatG": 5.0,
+      "carbsG": 21.0,
+      "servingG": 200
+    },
+    "poha": {
+      "kcal": 160,
+      "proteinG": 3.0,
+      "fatG": 5.5,
+      "carbsG": 25.0,
+      "servingG": 200
+    },
+    "pongal": {
+      "kcal": 150,
+      "proteinG": 4.5,
+      "fatG": 5.5,
+      "carbsG": 21.0,
+      "servingG": 200
+    },
+    "idiyappam": {
+      "kcal": 150,
+      "proteinG": 2.5,
+      "fatG": 0.5,
+      "carbsG": 33.0,
+      "servingG": 150
+    },
+    "dhokla": {
+      "kcal": 160,
+      "proteinG": 6.5,
+      "fatG": 5.5,
+      "carbsG": 21.0,
+      "servingG": 120
+    },
+    "pakora": {
+      "kcal": 300,
+      "proteinG": 8.0,
+      "fatG": 18.0,
+      "carbsG": 27.0,
+      "servingG": 100
+    },
+    "pani_puri": {
+      "kcal": 210,
+      "proteinG": 4.5,
+      "fatG": 8.0,
+      "carbsG": 30.0,
+      "servingG": 120
+    },
+    "bhel_puri": {
+      "kcal": 220,
+      "proteinG": 5.5,
+      "fatG": 8.0,
+      "carbsG": 32.0,
+      "servingG": 150
+    },
+    "papdi_chaat": {
+      "kcal": 230,
+      "proteinG": 6.0,
+      "fatG": 10.0,
+      "carbsG": 29.0,
+      "servingG": 150
+    },
+    "aloo_tikki": {
+      "kcal": 190,
+      "proteinG": 3.5,
+      "fatG": 9.0,
+      "carbsG": 24.0,
+      "servingG": 120
+    },
+    "dahi_vada": {
+      "kcal": 170,
+      "proteinG": 6.5,
+      "fatG": 7.0,
+      "carbsG": 20.0,
+      "servingG": 150
+    },
+    "kachori": {
+      "kcal": 400,
+      "proteinG": 8.0,
+      "fatG": 24.0,
+      "carbsG": 38.0,
+      "servingG": 70
+    },
+    "vada_pav": {
+      "kcal": 290,
+      "proteinG": 6.5,
+      "fatG": 13.0,
+      "carbsG": 37.0,
+      "servingG": 150
+    },
+    "pav_bhaji": {
+      "kcal": 180,
+      "proteinG": 4.5,
+      "fatG": 8.0,
+      "carbsG": 23.0,
+      "servingG": 300
+    },
+    "misal_pav": {
+      "kcal": 170,
+      "proteinG": 7.0,
+      "fatG": 7.5,
+      "carbsG": 20.0,
+      "servingG": 300
+    },
+    "kathi_roll": {
+      "kcal": 230,
+      "proteinG": 10.0,
+      "fatG": 10.0,
+      "carbsG": 25.0,
+      "servingG": 200
+    },
+    "momos": {
+      "kcal": 190,
+      "proteinG": 8.0,
+      "fatG": 6.0,
+      "carbsG": 26.0,
+      "servingG": 150
+    },
+    "paneer_tikka": {
+      "kcal": 250,
+      "proteinG": 15.0,
+      "fatG": 18.0,
+      "carbsG": 7.0,
+      "servingG": 150
+    },
+    "tandoori_chicken": {
+      "kcal": 150,
+      "proteinG": 23.0,
+      "fatG": 5.5,
+      "carbsG": 2.0,
+      "servingG": 200
+    },
+    "chicken_tikka": {
+      "kcal": 150,
+      "proteinG": 24.0,
+      "fatG": 5.0,
+      "carbsG": 3.0,
+      "servingG": 150
+    },
+    "seekh_kebab": {
+      "kcal": 230,
+      "proteinG": 17.0,
+      "fatG": 16.0,
+      "carbsG": 4.0,
+      "servingG": 120
+    },
+    "chicken_65": {
+      "kcal": 250,
+      "proteinG": 18.0,
+      "fatG": 15.0,
+      "carbsG": 11.0,
+      "servingG": 150
+    },
+    "chilli_chicken": {
+      "kcal": 210,
+      "proteinG": 15.0,
+      "fatG": 12.0,
+      "carbsG": 10.0,
+      "servingG": 200
+    },
+    "gobi_manchurian": {
+      "kcal": 190,
+      "proteinG": 3.5,
+      "fatG": 11.0,
+      "carbsG": 19.0,
+      "servingG": 150
+    },
+    "hakka_noodles": {
+      "kcal": 170,
+      "proteinG": 4.5,
+      "fatG": 6.0,
+      "carbsG": 25.0,
+      "servingG": 250
+    },
+    "raita": {
+      "kcal": 60,
+      "proteinG": 3.0,
+      "fatG": 3.0,
+      "carbsG": 5.0,
+      "servingG": 100
+    },
+    "papad": {
+      "kcal": 360,
+      "proteinG": 24.0,
+      "fatG": 3.0,
+      "carbsG": 60.0,
+      "servingG": 15
+    },
+    "gulab_jamun": {
+      "kcal": 320,
+      "proteinG": 4.5,
+      "fatG": 14.0,
+      "carbsG": 45.0,
+      "servingG": 80
+    },
+    "jalebi": {
+      "kcal": 380,
+      "proteinG": 2.5,
+      "fatG": 16.0,
+      "carbsG": 58.0,
+      "servingG": 60
+    },
+    "rasgulla": {
+      "kcal": 190,
+      "proteinG": 4.0,
+      "fatG": 3.5,
+      "carbsG": 37.0,
+      "servingG": 100
+    },
+    "rasmalai": {
+      "kcal": 220,
+      "proteinG": 6.0,
+      "fatG": 10.0,
+      "carbsG": 27.0,
+      "servingG": 120
+    },
+    "kheer": {
+      "kcal": 150,
+      "proteinG": 4.0,
+      "fatG": 5.5,
+      "carbsG": 21.0,
+      "servingG": 150
+    },
+    "gajar_halwa": {
+      "kcal": 250,
+      "proteinG": 4.5,
+      "fatG": 12.0,
+      "carbsG": 32.0,
+      "servingG": 120
+    },
+    "ladoo": {
+      "kcal": 420,
+      "proteinG": 7.0,
+      "fatG": 20.0,
+      "carbsG": 55.0,
+      "servingG": 40
+    },
+    "barfi": {
+      "kcal": 400,
+      "proteinG": 9.0,
+      "fatG": 18.0,
+      "carbsG": 52.0,
+      "servingG": 40
+    },
+    "kulfi": {
+      "kcal": 220,
+      "proteinG": 5.5,
+      "fatG": 12.0,
+      "carbsG": 23.0,
+      "servingG": 80
+    },
+    "mysore_pak": {
+      "kcal": 520,
+      "proteinG": 5.0,
+      "fatG": 35.0,
+      "carbsG": 47.0,
+      "servingG": 40
+    },
+    "falooda": {
+      "kcal": 140,
+      "proteinG": 3.5,
+      "fatG": 4.5,
+      "carbsG": 22.0,
+      "servingG": 300
+    },
+    "chai": {
+      "kcal": 52,
+      "proteinG": 1.6,
+      "fatG": 1.7,
+      "carbsG": 7.5,
+      "servingG": 150
+    },
+    "lassi": {
+      "kcal": 100,
+      "proteinG": 3.0,
+      "fatG": 3.0,
+      "carbsG": 16.0,
+      "servingG": 250
+    },
+    "filter_coffee": {
+      "kcal": 50,
+      "proteinG": 1.6,
+      "fatG": 1.7,
+      "carbsG": 7.0,
+      "servingG": 150
+    },
+    "banana": {
+      "kcal": 89,
+      "proteinG": 1.1,
+      "fatG": 0.3,
+      "carbsG": 22.8,
+      "servingG": 118
+    },
+    "apple": {
+      "kcal": 52,
+      "proteinG": 0.3,
+      "fatG": 0.2,
+      "carbsG": 13.8,
+      "servingG": 180
+    },
+    "orange": {
+      "kcal": 47,
+      "proteinG": 0.9,
+      "fatG": 0.1,
+      "carbsG": 11.8,
+      "servingG": 130
+    },
+    "mango": {
+      "kcal": 60,
+      "proteinG": 0.8,
+      "fatG": 0.4,
+      "carbsG": 15.0,
+      "servingG": 200
+    },
+    "grapes": {
+      "kcal": 69,
+      "proteinG": 0.7,
+      "fatG": 0.2,
+      "carbsG": 18.1,
+      "servingG": 150
+    },
+    "watermelon": {
+      "kcal": 30,
+      "proteinG": 0.6,
+      "fatG": 0.2,
+      "carbsG": 7.0,
+      "servingG": 280
+    },
+    "papaya": {
+      "kcal": 43,
+      "proteinG": 0.5,
+      "fatG": 0.3,
+      "carbsG": 10.8,
+      "servingG": 150
+    },
+    "boiled_egg": {
+      "kcal": 155,
+      "proteinG": 12.6,
+      "fatG": 10.6,
+      "carbsG": 1.1,
+      "servingG": 50
+    },
+    "oatmeal": {
+      "kcal": 71,
+      "proteinG": 2.5,
+      "fatG": 1.5,
+      "carbsG": 12.0,
+      "servingG": 250
+    },
+    "toast": {
+      "kcal": 290,
+      "proteinG": 9.0,
+      "fatG": 4.0,
+      "carbsG": 54.0,
+      "servingG": 60
     }
   }
 }

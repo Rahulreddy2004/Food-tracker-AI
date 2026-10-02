@@ -19,14 +19,17 @@ COPY pyproject.toml uv.lock README.md ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-install-project
 COPY app ./app
+# Always rebuild the app itself: uv would otherwise reuse a cached build of it from the cache mount
+# (it only checks pyproject.toml for changes) and ship stale code.
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev --no-editable
+    uv sync --locked --no-dev --no-editable --reinstall-package food-tracker-api
 
 FROM base AS runtime
 RUN useradd --create-home --uid 10001 api
 WORKDIR /app
 COPY --from=build /app/.venv /app/.venv
-COPY models/best.onnx models/classifier.onnx /app/models/
+# Whatever fetch_models.py put in api/models (originals and partial downloads are excluded).
+COPY models/ /app/models/
 ENV PATH="/app/.venv/bin:${PATH}" \
     ENV=production \
     LOG_JSON=true \

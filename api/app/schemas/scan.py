@@ -8,7 +8,7 @@ from app.schemas.common import ApiModel, Macros, NormBox
 
 
 class Prediction(ApiModel):
-    label: str = Field(description="Food-101 class name, e.g. `caesar_salad`")
+    label: str = Field(description="Dish name from labels.json, e.g. `palak_paneer`")
     display: str
     group: str
     confidence: float = Field(ge=0, le=1)

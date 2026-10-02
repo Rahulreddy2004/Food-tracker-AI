@@ -28,8 +28,14 @@ class Settings(BaseSettings):
     # --- Models ---------------------------------------------------------------
     model_backend: Literal["onnx", "fake"] = "onnx"
     models_dir: Path = API_DIR / "models"
+    # siglip2: open-vocabulary SigLIP 2, names every dish in labels.json (default)
+    # efficientnet: the EfficientNetV2-B3 Food-101 model, the 101 Food-101 dishes only
+    classifier: Literal["siglip2", "efficientnet"] = "siglip2"
+    classifier_file: str | None = None  # default: siglip2_vision.onnx or classifier.onnx
+    dish_embeddings_file: str = "siglip2_dishes.npz"
     detector_file: str = "best.onnx"
-    classifier_file: str = "classifier.onnx"
+    # Without a detector each photo is classified as one dish; set true to refuse to start instead.
+    detector_required: bool = False
     onnx_threads: int = Field(default=2, ge=1, le=16)
     max_image_side: int = Field(default=1280, ge=320, le=4096)
     max_upload_mb: float = Field(default=8, gt=0, le=25)
@@ -39,7 +45,9 @@ class Settings(BaseSettings):
     min_box_area_frac: float = Field(default=0.01, ge=0, le=1)
     dedupe_iou: float = Field(default=0.6, ge=0, le=1)
     crop_pad_frac: float = Field(default=0.0, ge=0, le=0.5)
-    confirm_below: float = Field(default=0.40, ge=0, le=1)
+    # Ask the user to confirm guesses below this confidence. For SigLIP 2 over 200 dishes, 0.5
+    # flags ~1 in 10 scans (mostly wrong guesses); the rest are 90-95% right (see MODEL_CARD.md).
+    confirm_below: float = Field(default=0.50, ge=0, le=1)
     top_k: int = Field(default=3, ge=1, le=10)
 
     # --- Data -----------------------------------------------------------------
@@ -80,6 +88,11 @@ class Settings(BaseSettings):
             if bad:
                 raise ValueError(f"Test-only backends are not allowed in production: {bad}")
         return self
+
+    @property
+    def classifier_path(self) -> Path:
+        default = "siglip2_vision.onnx" if self.classifier == "siglip2" else "classifier.onnx"
+        return self.models_dir / (self.classifier_file or default)
 
     @property
     def max_upload_bytes(self) -> int:
